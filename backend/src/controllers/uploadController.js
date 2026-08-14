@@ -8,8 +8,8 @@ export const handleFileUpload = (req, res) => {
     return res.status(400).json({ error: 'No file provided or file upload failed validation' });
   }
 
-  // Construct absolute file URL accessible to both participants
-  const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  const fileUrl = `${protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
   res.json({
     name: req.file.originalname,

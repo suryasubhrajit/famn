@@ -87,46 +87,50 @@ export const ChatProvider = ({ children }) => {
   const downloadFileDirectly = async (fileUrl, fileName) => {
     if (!fileUrl) return;
 
-    // Extract filename from URL (e.g. /uploads/1786720986141-59447-faviconsGalaxious.png)
-    const rawFilename = fileUrl.split('/uploads/').pop() || fileUrl.split('/').pop();
-    const downloadApiUrl = `${BACKEND_URL}/api/download/${rawFilename}?name=${encodeURIComponent(fileName || rawFilename)}`;
-
-    try {
-      // 1. Try fetching blob via backend download API with CORS
-      const targetUrl = fileUrl.includes('/uploads/') ? downloadApiUrl : fileUrl;
-      const response = await fetch(targetUrl, { mode: 'cors' });
-      if (!response.ok) throw new Error('Fetch failed');
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName || rawFilename || 'download';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
-      return;
-    } catch (err) {
-      console.warn('[Direct Download Fetch Fallback]', err);
+    // 1. Force HTTPS if page is HTTPS to avoid mixed-content block
+    let cleanUrl = fileUrl;
+    if (window.location.protocol === 'https:' && cleanUrl.startsWith('http://')) {
+      cleanUrl = cleanUrl.replace(/^http:\/\//, 'https://');
     }
 
-    // 2. Secondary fallback: Hidden iframe trigger to backend res.download() API
-    // Since backend sets Content-Disposition: attachment, iframe triggers download without navigating current tab
+    const rawFilename = cleanUrl.split('/uploads/').pop() || cleanUrl.split('/').pop();
+    const safeBackendUrl = BACKEND_URL.replace(/^http:\/\//, 'https://');
+    const downloadApiUrl = `${safeBackendUrl}/api/download/${rawFilename}?name=${encodeURIComponent(fileName || rawFilename)}`;
+
+    // Try fetching binary blob directly
+    try {
+      const targetUrl = cleanUrl.includes('/uploads/') ? downloadApiUrl : cleanUrl;
+      const response = await fetch(targetUrl, { mode: 'cors' });
+      if (response.ok) {
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = blobUrl;
+        a.download = fileName || rawFilename || 'download';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+        return;
+      }
+    } catch (err) {
+      console.warn('[Direct Download Fetch Failed, falling back to iframe]', err);
+    }
+
+    // Fallback: Trigger download via hidden iframe
+    // Because /api/download sends Content-Disposition: attachment, iframe downloads file without changing main page URL
     try {
       const iframe = document.createElement('iframe');
       iframe.style.display = 'none';
       iframe.src = downloadApiUrl;
       document.body.appendChild(iframe);
-      setTimeout(() => document.body.removeChild(iframe), 15000);
+      setTimeout(() => {
+        try { document.body.removeChild(iframe); } catch (e) {}
+      }, 15000);
     } catch (e) {
-      // Direct anchor fallback
-      const link = document.createElement('a');
-      link.href = downloadApiUrl;
-      link.download = fileName || rawFilename || 'download';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      console.error('[Download Iframe Error]', e);
     }
   };
 
