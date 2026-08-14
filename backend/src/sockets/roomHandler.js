@@ -1,4 +1,4 @@
-import { storeMessage, handleRoomParticipantChange, deleteRoom } from '../services/roomService.js';
+import { storeMessage, handleRoomParticipantChange, deleteRoom, getRoomMessages } from '../services/roomService.js';
 import { generateFriendlyHandle, isValidRoomId } from '../utils/generators.js';
 
 // Server-side map storing 1-minute solo waiting timers per roomId
@@ -100,7 +100,11 @@ export const registerRoomSocketHandlers = (io, socket) => {
     updateSoloRoomTimer(io, roomId, peerCount);
 
     io.to(roomId).emit('room:peers', peers);
-    console.log(`[Socket Join] ${validHandle} joined room: ${roomId} (Active: ${peerCount}/2)`);
+
+    // Emit stored room history to the joining / refreshed socket so messages persist across refresh
+    const history = await getRoomMessages(roomId);
+    socket.emit('room:history', history);
+    console.log(`[Socket Join] ${validHandle} joined room: ${roomId} (Active: ${peerCount}/2, History: ${history.length} msgs)`);
   });
 
   // 2. Broadcast Message Event

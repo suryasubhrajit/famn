@@ -65,6 +65,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
     BACKEND_URL,
     leaveRoom,
     openFileViewer,
+    downloadFileDirectly,
   } = useChat();
 
   const [text, setText] = useState('');
@@ -699,8 +700,8 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
                             >
                               <Eye size={16} />
                             </IconButton>
-                            <IconButton size="small" component="a" href={msg.file.url} download={msg.file.name}
-                              onClick={(e) => e.stopPropagation()}
+                            <IconButton size="small"
+                              onClick={(e) => { e.stopPropagation(); downloadFileDirectly(msg.file.url, msg.file.name); }}
                               sx={{ color: isSelf ? '#fff' : 'inherit', transition: 'transform 0.2s ease', '&:hover': { transform: 'scale(1.15)' } }}>
                               <Download size={16} />
                             </IconButton>
@@ -762,8 +763,8 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
 
                     {/* Save file */}
                     {msg.file && (
-                      <Box component="a" href={msg.file.url} download={msg.file.name}
-                        onClick={() => setActiveMsgId(null)}
+                      <Box
+                        onClick={() => { downloadFileDirectly(msg.file.url, msg.file.name); setActiveMsgId(null); }}
                         sx={{ display: 'flex', alignItems: 'center', gap: 1.2,
                              px: 1.8, py: 1, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
                              textDecoration: 'none', color: 'inherit',

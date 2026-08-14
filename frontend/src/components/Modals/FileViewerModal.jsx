@@ -35,7 +35,7 @@ import { useChat } from '../../context/ChatContext';
 export const FileViewerModal = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { activeModal, setActiveModal, selectedFile, setSelectedFile, selectedImage, setSelectedImage, mode } = useChat();
+  const { activeModal, setActiveModal, selectedFile, setSelectedFile, selectedImage, setSelectedImage, mode, downloadFileDirectly } = useChat();
 
   // Support both selectedFile object and legacy selectedImage string
   const currentFile = selectedFile || (selectedImage ? { url: selectedImage, name: 'Image Attachment', type: 'image' } : null);
@@ -82,6 +82,7 @@ export const FileViewerModal = () => {
   };
 
   const category = getFileCategory();
+  const isSmallImg = category === 'image' && imgDimensions && (imgDimensions.width < 420 || imgDimensions.height < 420);
 
   // Reset controls when file changes
   useEffect(() => {
@@ -148,12 +149,18 @@ export const FileViewerModal = () => {
     }
   };
 
+  const getDialogMaxWidth = () => {
+    if (category === 'pdf' || category === 'text') return 'lg';
+    if (isSmallImg) return 'sm';
+    return 'md';
+  };
+
   return (
     <Dialog
       open={open}
       onClose={handleClose}
       fullScreen={isMobile}
-      maxWidth={category === 'pdf' || category === 'text' ? 'lg' : 'md'}
+      maxWidth={getDialogMaxWidth()}
       fullWidth
       PaperProps={{
         sx: {
@@ -166,6 +173,7 @@ export const FileViewerModal = () => {
           height: isMobile ? '100vh' : 'auto',
           display: 'flex',
           flexDirection: 'column',
+          transition: 'all 0.3s ease',
           border: isMobile ? 'none' : `1px solid ${mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
         },
       }}
@@ -291,9 +299,7 @@ export const FileViewerModal = () => {
           {currentFile?.url && (
             <Tooltip title="Download File">
               <IconButton
-                component="a"
-                href={currentFile.url}
-                download={currentFile.name || 'download'}
+                onClick={() => downloadFileDirectly(currentFile.url, currentFile.name)}
                 size="small"
                 sx={{
                   bgcolor: 'primary.main',
@@ -327,7 +333,7 @@ export const FileViewerModal = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justify: 'center',
-          minHeight: isMobile ? 'calc(100vh - 60px)' : 360,
+          minHeight: isMobile ? 'calc(100vh - 60px)' : isSmallImg ? 300 : 360,
           bgcolor:
             category === 'image'
               ? mode === 'dark' ? '#070B14' : '#F1F5F9'
@@ -335,20 +341,20 @@ export const FileViewerModal = () => {
           position: 'relative',
         }}
       >
-        {/* IMAGE PREVIEWER - Perfectly Centered Responsive Container */}
+        {/* IMAGE PREVIEWER - Smart Auto-fit & Scaling Container */}
         {category === 'image' && currentFile?.url && (
           <Box
             sx={{
               width: '100%',
               height: '100%',
               flex: 1,
-              minHeight: isMobile ? 'calc(100vh - 60px)' : '60vh',
+              minHeight: isMobile ? 'calc(100vh - 60px)' : isSmallImg ? '340px' : '60vh',
               maxHeight: isMobile ? 'calc(100vh - 60px)' : '78vh',
               display: 'flex',
               alignItems: 'center',
               justify: 'center',
               overflow: 'auto',
-              p: { xs: 2, sm: 3 },
+              p: { xs: 2.5, sm: 4 },
               position: 'relative',
             }}
           >
@@ -357,13 +363,16 @@ export const FileViewerModal = () => {
               alt={currentFile.name || 'Image'}
               onLoad={(e) => setImgDimensions({ width: e.target.naturalWidth, height: e.target.naturalHeight })}
               style={{
-                maxWidth: '92%',
+                width: isSmallImg ? '100%' : 'auto',
+                height: 'auto',
+                maxWidth: isSmallImg ? '380px' : '92%',
                 maxHeight: isMobile ? '82vh' : '72vh',
+                minWidth: isSmallImg ? '240px' : 'auto',
                 objectFit: 'contain',
-                borderRadius: '12px',
+                borderRadius: '16px',
                 transform: `scale(${zoom}) rotate(${rotation}deg)`,
                 transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: mode === 'dark' ? '0 12px 40px rgba(0,0,0,0.6)' : '0 12px 30px rgba(0,0,0,0.12)',
+                boxShadow: mode === 'dark' ? '0 16px 48px rgba(0,0,0,0.6)' : '0 12px 36px rgba(0,0,0,0.14)',
                 margin: 'auto',
                 display: 'block',
               }}
@@ -479,9 +488,7 @@ export const FileViewerModal = () => {
                 </Typography>
                 <Button
                   variant="contained"
-                  component="a"
-                  href={currentFile?.url}
-                  download={currentFile?.name}
+                  onClick={() => downloadFileDirectly(currentFile?.url, currentFile?.name)}
                   startIcon={<Download size={16} />}
                 >
                   Download File Instead
@@ -571,9 +578,7 @@ export const FileViewerModal = () => {
             <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center' }}>
               <Button
                 variant="contained"
-                component="a"
-                href={currentFile?.url}
-                download={currentFile?.name}
+                onClick={() => downloadFileDirectly(currentFile?.url, currentFile?.name)}
                 startIcon={<Download size={18} />}
                 sx={{ borderRadius: '12px', fontWeight: 700, px: 3 }}
               >

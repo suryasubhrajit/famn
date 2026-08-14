@@ -83,6 +83,33 @@ export const ChatProvider = ({ children }) => {
     setActiveModal('lightbox');
   };
 
+  // Helper to force in-browser file download directly without opening/redirecting to cross-origin URLs
+  const downloadFileDirectly = async (fileUrl, fileName) => {
+    if (!fileUrl) return;
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error('Fetch failed');
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+    } catch (err) {
+      // Fallback anchor trigger
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.target = '_blank';
+      link.download = fileName || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   // ── Verify Room Existence & Format on Mount or Direct Navigation ───────────
   useEffect(() => {
     const pathCode = window.location.pathname.replace(/^\/+/, '').trim().toLowerCase();
@@ -226,6 +253,13 @@ export const ChatProvider = ({ children }) => {
           return true;
         });
         setPeers(deduped);
+      }
+    });
+
+    // Populate room history on socket connect / page refresh
+    newSocket.on('room:history', (historyMessages) => {
+      if (historyMessages && Array.isArray(historyMessages)) {
+        setMessages(historyMessages);
       }
     });
 
@@ -560,6 +594,7 @@ export const ChatProvider = ({ children }) => {
         selectedFile,
         setSelectedFile,
         openFileViewer,
+        downloadFileDirectly,
       }}
     >
       {children}
