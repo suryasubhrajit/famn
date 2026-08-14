@@ -10,6 +10,19 @@ const NOUNS = [
   'Viper', 'Jaguar', 'Bison', 'Cobra', 'Orion', 'Pulsar', 'Titan', 'Spectre'
 ];
 
+// Strict 3-4-3 letter validation for Google Meet style room IDs (e.g. "tsy-cusn-bti")
+export const isValidRoomId = (code) => {
+  if (!code || typeof code !== 'string') return false;
+  const clean = code.trim().toLowerCase();
+  const parts = clean.split('-');
+  if (parts.length !== 3) return false;
+  return (
+    parts[0].length === 3 && /^[a-z]{3}$/.test(parts[0]) &&
+    parts[1].length === 4 && /^[a-z]{4}$/.test(parts[1]) &&
+    parts[2].length === 3 && /^[a-z]{3}$/.test(parts[2])
+  );
+};
+
 // Google Meet Style Room Code Generator (3-4-3 letters e.g. "tsy-cusn-bti")
 export const generateUniqueRoomId = () => {
   const letters = 'abcdefghijklmnopqrstuvwxyz';

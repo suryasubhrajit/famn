@@ -1,10 +1,13 @@
 import { storeMessage, handleRoomParticipantChange } from '../services/roomService.js';
-import { generateFriendlyHandle } from '../utils/generators.js';
+import { generateFriendlyHandle, isValidRoomId } from '../utils/generators.js';
 
 export const registerRoomSocketHandlers = (io, socket) => {
-  // 1. Join Room Event (Enforces strict max 2 participants)
+  // 1. Join Room Event (Enforces strict max 2 participants & 3-4-3 room code format)
   socket.on('room:join', async ({ roomId, handle, color }) => {
-    if (!roomId) return;
+    if (!roomId || !isValidRoomId(roomId)) {
+      socket.emit('room:invalid', { error: 'Invalid room format' });
+      return;
+    }
 
     const validHandle = handle && !handle.toLowerCase().includes('peer') ? handle : generateFriendlyHandle();
     const roomSockets = io.sockets.adapter.rooms.get(roomId);

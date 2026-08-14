@@ -5,6 +5,19 @@ const ChatContext = createContext(null);
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
+// Strict 3-4-3 letter validation for Google Meet style room IDs (e.g. "tsy-cusn-bti")
+export const isValidRoomId = (code) => {
+  if (!code || typeof code !== 'string') return false;
+  const clean = code.trim().toLowerCase();
+  const parts = clean.split('-');
+  if (parts.length !== 3) return false;
+  return (
+    parts[0].length === 3 && /^[a-z]{3}$/.test(parts[0]) &&
+    parts[1].length === 4 && /^[a-z]{4}$/.test(parts[1]) &&
+    parts[2].length === 3 && /^[a-z]{3}$/.test(parts[2])
+  );
+};
+
 export const ChatProvider = ({ children }) => {
   // Session Profile
   const [handle, setHandleState] = useState(() => sessionStorage.getItem('p2p_handle') || '');
@@ -12,15 +25,19 @@ export const ChatProvider = ({ children }) => {
 
   // Room State (Parse Google Meet style room code from path e.g. /tsy-cusn-bti or query param)
   const [roomId, setRoomId] = useState(() => {
-    const pathCode = window.location.pathname.replace(/^\/+/, '').trim();
-    if (pathCode && /^[a-z]{3}-[a-z]{4}-[a-z]{3}$/.test(pathCode)) {
+    const pathCode = window.location.pathname.replace(/^\/+/, '').trim().toLowerCase();
+    if (pathCode && isValidRoomId(pathCode)) {
       return pathCode;
     }
     const params = new URLSearchParams(window.location.search);
-    return params.get('room') || null;
+    const queryCode = (params.get('room') || '').trim().toLowerCase();
+    if (queryCode && isValidRoomId(queryCode)) {
+      return queryCode;
+    }
+    return null;
   });
 
-  // Room notice alert (e.g. "Room expired" or "Room is full (max 2 participants)")
+  // Room notice alert (e.g. "Room expired" or "Invalid format")
   const [roomNoticeAlert, setRoomNoticeAlert] = useState(null);
 
   // Ref to always have latest roomId inside socket callbacks (avoids stale closure)
@@ -53,9 +70,31 @@ export const ChatProvider = ({ children }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
-  // ── Verify Room Existence in Redis on Mount or Direct Navigation ───────────
+  // ── Verify Room Existence & Format on Mount or Direct Navigation ───────────
   useEffect(() => {
+    const pathCode = window.location.pathname.replace(/^\/+/, '').trim().toLowerCase();
+    
+    // Direct URL check: If user pasted an ill-formatted code in Chrome URL bar
+    if (pathCode && !isValidRoomId(pathCode)) {
+      console.warn(`[URL Validator] Invalid room code format: "${pathCode}"`);
+      setRoomNoticeAlert(`Room link "#${pathCode}" is invalid. Room codes must be 3 letters, 4 letters, and 3 letters separated by hyphens (e.g. tsy-cusn-bti).`);
+      window.history.replaceState(null, '', '/');
+      setRoomId(null);
+      setMessages([]);
+      setPeers([]);
+      return;
+    }
+
     if (!roomId) return;
+
+    if (!isValidRoomId(roomId)) {
+      setRoomNoticeAlert(`Room code "#${roomId}" is invalid. Room codes must be formatted like tsy-cusn-bti.`);
+      window.history.replaceState(null, '', '/');
+      setRoomId(null);
+      setMessages([]);
+      setPeers([]);
+      return;
+    }
 
     fetch(`${BACKEND_URL}/api/rooms/${roomId}/exists`)
       .then((res) => res.json())
@@ -63,11 +102,13 @@ export const ChatProvider = ({ children }) => {
         if (!data?.exists) {
           console.warn(`[Room Check] Room ${roomId} does not exist or has expired.`);
           setRoomNoticeAlert(`Room #${roomId} has expired or does not exist. Create a new room to start chatting.`);
+          window.history.replaceState(null, '', '/');
           setRoomId(null);
           setMessages([]);
           setPeers([]);
         } else {
           setRoomNoticeAlert(null);
+          window.history.replaceState(null, '', `/${roomId}`);
         }
       })
       .catch(() => {
@@ -290,13 +331,19 @@ export const ChatProvider = ({ children }) => {
   // ── Join Room (Async Existence & Availability Check) ──────────────────────
   const joinRoom = async (targetRoomId, skipExistCheck = false) => {
     setRoomNoticeAlert(null);
-    let cleanCode = (targetRoomId || '').trim();
+    let cleanCode = (targetRoomId || '').trim().toLowerCase();
     if (cleanCode.includes('/')) cleanCode = cleanCode.split('/').pop();
     if (cleanCode.includes('?')) cleanCode = cleanCode.split('?')[0];
 
     if (!cleanCode) return false;
 
-    // Verify room existence in Redis before allowing user to enter
+    // 1. Strict 3-4-3 format check BEFORE network request
+    if (!isValidRoomId(cleanCode)) {
+      setRoomNoticeAlert(`Room code "#${cleanCode}" is invalid. Room codes must be 3 letters, 4 letters, and 3 letters separated by hyphens (e.g. tsy-cusn-bti).`);
+      return false;
+    }
+
+    // 2. Verify room existence in Redis before allowing user to enter
     if (!skipExistCheck) {
       try {
         const res = await fetch(`${BACKEND_URL}/api/rooms/${cleanCode}/exists`);
@@ -314,6 +361,7 @@ export const ChatProvider = ({ children }) => {
     setRoomId(cleanCode);
     setMessages([]);
     setPeers([]);
+    window.history.replaceState(null, '', `/${cleanCode}`);
 
     const sock = socketRef.current;
     if (sock && sock.connected) {
