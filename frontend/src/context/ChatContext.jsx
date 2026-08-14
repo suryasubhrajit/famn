@@ -274,7 +274,7 @@ export const ChatProvider = ({ children }) => {
       const res = await fetch(`${BACKEND_URL}/api/rooms/create`, { method: 'POST' });
       const data = await res.json();
       if (data?.roomId) {
-        joinRoom(data.roomId);
+        joinRoom(data.roomId, true);
         setActiveModal('qrCode');
         return;
       }
@@ -283,16 +283,33 @@ export const ChatProvider = ({ children }) => {
     const letters = 'abcdefghijklmnopqrstuvwxyz';
     const rand = (n) => Array.from({ length: n }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
     const fallbackId = `${rand(3)}-${rand(4)}-${rand(3)}`;
-    joinRoom(fallbackId);
+    joinRoom(fallbackId, true);
     setActiveModal('qrCode');
   };
 
-  // ── Join Room ─────────────────────────────────────────────────────────────
-  const joinRoom = (targetRoomId) => {
+  // ── Join Room (Async Existence & Availability Check) ──────────────────────
+  const joinRoom = async (targetRoomId, skipExistCheck = false) => {
     setRoomNoticeAlert(null);
-    let cleanCode = targetRoomId.trim();
+    let cleanCode = (targetRoomId || '').trim();
     if (cleanCode.includes('/')) cleanCode = cleanCode.split('/').pop();
     if (cleanCode.includes('?')) cleanCode = cleanCode.split('?')[0];
+
+    if (!cleanCode) return false;
+
+    // Verify room existence in Redis before allowing user to enter
+    if (!skipExistCheck) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/rooms/${cleanCode}/exists`);
+        const data = await res.json();
+
+        if (!data?.exists) {
+          setRoomNoticeAlert(`Room #${cleanCode} does not exist or has expired. Create a new room to start chatting.`);
+          return false;
+        }
+      } catch (e) {
+        // Fallback if network issue
+      }
+    }
 
     setRoomId(cleanCode);
     setMessages([]);
@@ -302,6 +319,7 @@ export const ChatProvider = ({ children }) => {
     if (sock && sock.connected) {
       sock.emit('room:join', { roomId: cleanCode, handle, color: avatarColor });
     }
+    return true;
   };
 
   // ── Leave Room ────────────────────────────────────────────────────────────

@@ -21,11 +21,20 @@ export const RoomLanding = () => {
   const theme = useTheme();
   const { createNewRoom, joinRoom, handle, mode, roomNoticeAlert, setRoomNoticeAlert } = useChat();
   const [joinInput, setJoinInput] = useState('');
+  const [joining, setJoining] = useState(false);
 
-  const handleJoin = (e) => {
-    e.preventDefault();
-    if (joinInput.trim()) {
-      joinRoom(joinInput.trim());
+  const handleJoin = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!joinInput.trim() || joining) return;
+
+    setJoining(true);
+    try {
+      await joinRoom(joinInput.trim());
+    } finally {
+      setJoining(false);
     }
   };
 
@@ -136,10 +145,8 @@ export const RoomLanding = () => {
 
           <Divider sx={{ my: 2.5, fontSize: '0.72rem', color: 'text.secondary' }}>OR JOIN EXISTING ROOM</Divider>
 
-          {/* Action 2: Join Form */}
+          {/* Action 2: Join Input */}
           <Box
-            component="form"
-            onSubmit={handleJoin}
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', sm: 'row' },
@@ -152,6 +159,12 @@ export const RoomLanding = () => {
               placeholder="Paste room code (e.g. tsy-cusn-bti)"
               value={joinInput}
               onChange={(e) => setJoinInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleJoin(e);
+                }
+              }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '12px',
@@ -161,9 +174,10 @@ export const RoomLanding = () => {
               }}
             />
             <Button
-              type="submit"
+              type="button"
               variant="outlined"
-              disabled={!joinInput.trim()}
+              onClick={handleJoin}
+              disabled={joining || !joinInput.trim()}
               endIcon={<ArrowRight size={18} />}
               sx={{
                 borderRadius: '12px',
@@ -173,7 +187,7 @@ export const RoomLanding = () => {
                 fontWeight: 700,
               }}
             >
-              Join
+              {joining ? 'Checking...' : 'Join'}
             </Button>
           </Box>
 
