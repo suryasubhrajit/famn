@@ -76,7 +76,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
 
   const fileInputRef = useRef(null);
   const textInputRef = useRef(null);
-  const messagesEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
   const typingTimerRef = useRef(null);
 
   // ── Solo countdown timer (60s) — auto fallback to landing if no 2nd user joins ──
@@ -146,8 +146,13 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
   // The other person in the room (not yourself)
   const partner = peers.find((p) => p.handle !== handle);
 
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  useEffect(() => { scrollToBottom(); }, [messages]);
+  // Auto-scroll to bottom whenever messages change
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleSend = () => {
@@ -412,7 +417,9 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
         </Box>
 
         {/* Scrollable Message Stream Container (Scrolls independently over fixed watermark) */}
-        <Box sx={{
+        <Box
+          ref={scrollContainerRef}
+          sx={{
           height: '100%',
           overflowY: 'auto',
           p: { xs: 1.5, sm: 3 },
@@ -760,7 +767,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
             </Box>
           );
         })}
-        <div ref={messagesEndRef} />
+
         </Box>
       </Box>
 

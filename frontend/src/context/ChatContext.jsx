@@ -64,7 +64,7 @@ export const ChatProvider = ({ children }) => {
   const [fileErrorAlert, setFileErrorAlert] = useState(null);
 
   // UI Modals & Theme
-  const [mode, setMode] = useState(() => localStorage.getItem('famn_theme') || 'dark');
+  const [mode, setMode] = useState(() => localStorage.getItem('famn_theme') || 'light');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
