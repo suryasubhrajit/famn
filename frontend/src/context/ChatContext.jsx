@@ -86,24 +86,44 @@ export const ChatProvider = ({ children }) => {
   // Helper to force in-browser file download directly without opening/redirecting to cross-origin URLs
   const downloadFileDirectly = async (fileUrl, fileName) => {
     if (!fileUrl) return;
+
+    // Extract filename from URL (e.g. /uploads/1786720986141-59447-faviconsGalaxious.png)
+    const rawFilename = fileUrl.split('/uploads/').pop() || fileUrl.split('/').pop();
+    const downloadApiUrl = `${BACKEND_URL}/api/download/${rawFilename}?name=${encodeURIComponent(fileName || rawFilename)}`;
+
     try {
-      const response = await fetch(fileUrl);
+      // 1. Try fetching blob via backend download API with CORS
+      const targetUrl = fileUrl.includes('/uploads/') ? downloadApiUrl : fileUrl;
+      const response = await fetch(targetUrl, { mode: 'cors' });
       if (!response.ok) throw new Error('Fetch failed');
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
+
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = fileName || 'download';
+      link.download = fileName || rawFilename || 'download';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+      return;
     } catch (err) {
-      // Fallback anchor trigger
+      console.warn('[Direct Download Fetch Fallback]', err);
+    }
+
+    // 2. Secondary fallback: Hidden iframe trigger to backend res.download() API
+    // Since backend sets Content-Disposition: attachment, iframe triggers download without navigating current tab
+    try {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = downloadApiUrl;
+      document.body.appendChild(iframe);
+      setTimeout(() => document.body.removeChild(iframe), 15000);
+    } catch (e) {
+      // Direct anchor fallback
       const link = document.createElement('a');
-      link.href = fileUrl;
-      link.target = '_blank';
-      link.download = fileName || 'download';
+      link.href = downloadApiUrl;
+      link.download = fileName || rawFilename || 'download';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

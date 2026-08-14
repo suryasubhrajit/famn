@@ -1,4 +1,7 @@
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { UPLOADS_DIR } from '../config/multer.js';
 
 export const handleFileUpload = (req, res) => {
   if (!req.file) {
@@ -14,6 +17,32 @@ export const handleFileUpload = (req, res) => {
     url: fileUrl,
     size: `${(req.file.size / (1024 * 1024)).toFixed(2)} MB`,
     mimetype: req.file.mimetype,
+  });
+};
+
+export const handleFileDownload = (req, res) => {
+  const filename = req.params.filename || req.query.filename;
+  const originalName = req.query.name || filename;
+
+  if (!filename) {
+    return res.status(400).json({ error: 'Filename is required' });
+  }
+
+  // Prevent path traversal attacks
+  const safeFilename = path.basename(filename);
+  const filePath = path.join(UPLOADS_DIR, safeFilename);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found or has auto-expired' });
+  }
+
+  // Set headers to force in-browser download
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+  res.download(filePath, originalName, (err) => {
+    if (err && !res.headersSent) {
+      res.status(500).json({ error: 'Download failed' });
+    }
   });
 };
 

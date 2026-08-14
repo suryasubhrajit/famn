@@ -25,7 +25,11 @@ app.use(express.json());
 // Serve Static Uploads & Public Brand Assets (Logos, Favicons, CSS)
 const publicDir = path.join(process.cwd(), 'public');
 app.use('/public', express.static(publicDir));
-app.use('/uploads', express.static(UPLOADS_DIR));
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+  next();
+}, express.static(UPLOADS_DIR));
 
 // Mount REST API Router
 app.use('/api', apiRoutes);
