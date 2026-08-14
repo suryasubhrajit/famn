@@ -58,3 +58,8 @@ body {
 .glow-effect {
   animation: pulseGlow 4s infinite ease-in-out;
 }
+
+/* Hide Google reCAPTCHA v3 floating badge from UI */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
