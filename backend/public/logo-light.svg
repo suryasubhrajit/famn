@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="lightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#6366F1" />
+    </linearGradient>
+  </defs>
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="#F3F4F6" border="2px solid #E5E7EB" />
+  <rect x="64" y="64" width="384" height="384" rx="80" fill="url(#lightGrad)" />
+  <path d="M 320 128 A 144 144 0 1 0 384 352 A 160 160 0 1 1 320 128 Z" fill="#F59E0B" />
+  <path d="M 270 140 L 190 270 L 260 270 L 230 370 L 330 240 L 260 240 Z" fill="#FFFFFF" />
+</svg>

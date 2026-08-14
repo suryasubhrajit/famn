@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Dark Midnight Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="50%" stop-color="#090D16" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Secondary (Back) Bubble Gradient - Cyber Cyan / Indigo -->
+    <linearGradient id="backBubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#4F46E5" />
+    </linearGradient>
+
+    <!-- Primary (Front) Bubble Gradient - Neon Violet / Hot Pink -->
+    <linearGradient id="frontBubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="60%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#F43F5E" />
+    </linearGradient>
+
+    <!-- Smooth Ambient Glow -->
+    <filter id="ambientGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="24" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Drop Shadow for Clean Layering -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Canvas Squircle Background -->
+  <rect width="512" height="512" rx="116" fill="url(#bgGrad)" />
+
+  <!-- Ambient Glow Behind Bubbles -->
+  <circle cx="270" cy="270" r="130" fill="#EC4899" opacity="0.22" filter="url(#ambientGlow)" />
+  <circle cx="210" cy="200" r="100" fill="#06B6D4" opacity="0.20" filter="url(#ambientGlow)" />
+
+  <!-- 1. Secondary Back Speech Bubble (Cyan/Indigo) -->
+  <g filter="url(#dropShadow)">
+    <path d="M 140 140 
+             H 290 
+             C 325 140, 350 165, 350 200 
+             V 220 
+             C 350 255, 325 280, 290 280 
+             H 190 
+             L 130 320 
+             V 280 
+             H 140 
+             C 105 280, 80 255, 80 220 
+             V 200 
+             C 80 165, 105 140, 140 140 Z" 
+          fill="url(#backBubbleGrad)" 
+          opacity="0.9" />
+  </g>
+
+  <!-- 2. Primary Front Speech Bubble (Magenta/Purple) -->
+  <g filter="url(#dropShadow)">
+    <path d="M 220 220 
+             H 370 
+             C 405 220, 430 245, 430 280 
+             V 310 
+             C 430 345, 405 370, 370 370 
+             H 360 
+             V 415 
+             L 300 370 
+             H 220 
+             C 185 370, 160 345, 160 310 
+             V 280 
+             C 160 245, 185 220, 220 220 Z" 
+          fill="url(#frontBubbleGrad)" />
+  </g>
+
+  <!-- 3. Front Bubble Chat Typing Dots (3 Glowing Pulse Dots) -->
+  <!-- Dot 1 -->
+  <circle cx="245" cy="295" r="15" fill="#FFFFFF" opacity="0.95" />
+  
+  <!-- Dot 2 -->
+  <circle cx="295" cy="295" r="15" fill="#FFFFFF" opacity="0.95" />
+  
+  <!-- Dot 3 -->
+  <circle cx="345" cy="295" r="15" fill="#FFFFFF" opacity="0.95" />
+
+  <!-- Subtle Mini Accent Sparkle on Top Right of Bubble -->
+  <circle cx="410" cy="205" r="4" fill="#38BDF8" opacity="0.8" />
+</svg>

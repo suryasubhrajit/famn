@@ -1,0 +1,24 @@
+/* Fun At Mid Night - Global Static Design System Tokens */
+:root {
+  --brand-primary: #6366F1;
+  --brand-primary-hover: #4F46E5;
+  --brand-accent: #8B5CF6;
+  --brand-gold: #F59E0B;
+  --brand-emerald: #10B981;
+  --brand-dark-bg: #0F0F23;
+  --brand-dark-card: #1E1E38;
+  --brand-light-bg: #F8FAFC;
+  --brand-light-card: #FFFFFF;
+}
+
+.brand-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.brand-gradient-text {
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

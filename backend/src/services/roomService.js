@@ -1,0 +1,135 @@
+import { getRedisClient } from '../config/redis.js';
+import { generateUniqueRoomId } from '../utils/generators.js';
+
+const memoryRoomMessages = new Map();
+const memoryRoomMeta = new Map();
+
+export const parseTTLSeconds = (ttlString) => {
+  switch (ttlString) {
+    case '15m': return 15 * 60;
+    case '1h': return 60 * 60;
+    case '24h': return 24 * 60 * 60;
+    case 'burn': return 120; // 2 Minutes TTL for burn on read
+    default: return 3600;
+  }
+};
+
+// Check if a room ID exists in Redis or Memory
+export const checkRoomExists = async (roomId) => {
+  const redis = getRedisClient();
+
+  if (redis) {
+    try {
+      const exists = await redis.exists(`room:${roomId}:meta`, `room:${roomId}:messages`);
+      return exists > 0;
+    } catch (err) {
+      console.error('[RoomService Exists Check Error]', err.message);
+    }
+  }
+
+  return memoryRoomMeta.has(roomId) || memoryRoomMessages.has(roomId);
+};
+
+// Generate a guaranteed unused room code by checking Redis/Memory collisions
+export const createUniqueRoom = async () => {
+  let roomId = generateUniqueRoomId();
+  let attempts = 0;
+
+  while ((await checkRoomExists(roomId)) && attempts < 10) {
+    roomId = generateUniqueRoomId();
+    attempts++;
+  }
+
+  const redis = getRedisClient();
+  const defaultTtlSeconds = 3600; // 1 Hour default
+
+  if (redis) {
+    try {
+      const metaKey = `room:${roomId}:meta`;
+      await redis.hset(metaKey, {
+        createdAt: new Date().toISOString(),
+        ttl: '1h',
+        activeParticipants: 1,
+      });
+      await redis.expire(metaKey, defaultTtlSeconds);
+    } catch (err) {
+      console.error('[RoomService Create Error]', err.message);
+    }
+  }
+
+  memoryRoomMeta.set(roomId, {
+    createdAt: new Date().toISOString(),
+    ttl: '1h',
+    activeParticipants: 1,
+  });
+
+  return roomId;
+};
+
+// Store message with TTL
+export const storeMessage = async (roomId, message) => {
+  const redis = getRedisClient();
+  const ttlSeconds = parseTTLSeconds(message.ttl || '1h');
+
+  if (redis) {
+    try {
+      const key = `room:${roomId}:messages`;
+      await redis.rpush(key, JSON.stringify(message));
+      await redis.expire(key, ttlSeconds);
+
+      // Keep metadata key TTL in sync
+      await redis.expire(`room:${roomId}:meta`, ttlSeconds);
+      return;
+    } catch (err) {
+      console.error('[RoomService Redis Store Error]', err.message);
+    }
+  }
+
+  if (!memoryRoomMessages.has(roomId)) {
+    memoryRoomMessages.set(roomId, []);
+  }
+  memoryRoomMessages.get(roomId).push(message);
+};
+
+// Handle room empty / user disconnect inactivity cleanup
+export const handleRoomParticipantChange = async (roomId, activeParticipantCount) => {
+  const redis = getRedisClient();
+
+  if (activeParticipantCount === 0) {
+    // Fast auto-destruction when all users leave (e.g. 5 minutes or 300 seconds)
+    const emptyTtlSeconds = 300; 
+
+    if (redis) {
+      try {
+        await redis.expire(`room:${roomId}:messages`, emptyTtlSeconds);
+        await redis.expire(`room:${roomId}:meta`, emptyTtlSeconds);
+        console.log(`[Room Auto-Destruct Scheduled] Room ${roomId} is empty. Destructing in 5m.`);
+      } catch (err) {
+        console.error('[RoomService Auto-Destruct Error]', err.message);
+      }
+    }
+  } else {
+    // Users are active in room, refresh room TTL
+    if (redis) {
+      try {
+        await redis.expire(`room:${roomId}:messages`, 3600);
+        await redis.expire(`room:${roomId}:meta`, 3600);
+      } catch (err) {}
+    }
+  }
+};
+
+export const getRoomMessages = async (roomId) => {
+  const redis = getRedisClient();
+
+  if (redis) {
+    try {
+      const raw = await redis.lrange(`room:${roomId}:messages`, 0, -1);
+      return raw.map((m) => JSON.parse(m));
+    } catch (err) {
+      console.error('[RoomService Get Error]', err.message);
+    }
+  }
+
+  return memoryRoomMessages.get(roomId) || [];
+};
