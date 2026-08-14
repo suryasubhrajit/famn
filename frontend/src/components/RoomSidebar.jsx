@@ -98,7 +98,7 @@ export const RoomSidebar = ({ onCloseMobileDrawer }) => {
           }}
         >
           <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: '0.08em', display: 'block', mb: 0.8 }}>
-            ACTIVE EPHEMERAL ROOM
+            ACTIVE ROOM
           </Typography>
 
           <Typography variant="subtitle1" sx={{ fontWeight: 800, fontFamily: 'monospace', mb: 1.5, wordBreak: 'break-all' }}>
@@ -176,7 +176,7 @@ export const RoomSidebar = ({ onCloseMobileDrawer }) => {
       {roomId && (
         <Box sx={{ mb: 3 }}>
           <Typography variant="overline" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: '0.08em', display: 'block', mb: 1 }}>
-            REDIS AUTO-DESTRUCT TTL
+            AUTO-DELETE MESSAGES
           </Typography>
           <Paper
             elevation={0}
@@ -204,9 +204,9 @@ export const RoomSidebar = ({ onCloseMobileDrawer }) => {
           </Paper>
 
           <Menu anchorEl={ttlAnchor} open={Boolean(ttlAnchor)} onClose={() => setTtlAnchor(null)}>
-            <MenuItem onClick={() => { setRoomTTL('15m'); setTtlAnchor(null); }}>15 Minutes TTL</MenuItem>
-            <MenuItem onClick={() => { setRoomTTL('1h'); setTtlAnchor(null); }}>1 Hour TTL</MenuItem>
-            <MenuItem onClick={() => { setRoomTTL('24h'); setTtlAnchor(null); }}>24 Hours TTL</MenuItem>
+            <MenuItem onClick={() => { setRoomTTL('15m'); setTtlAnchor(null); }}>15 Minutes</MenuItem>
+            <MenuItem onClick={() => { setRoomTTL('1h'); setTtlAnchor(null); }}>1 Hour</MenuItem>
+            <MenuItem onClick={() => { setRoomTTL('24h'); setTtlAnchor(null); }}>24 Hours</MenuItem>
             <MenuItem onClick={() => { setRoomTTL('burn'); setTtlAnchor(null); }}>Burn on Read</MenuItem>
           </Menu>
         </Box>
@@ -234,26 +234,12 @@ export const RoomSidebar = ({ onCloseMobileDrawer }) => {
                   gap: 1.2,
                 }}
               >
-                <Badge
-                  overlap="circular"
-                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                  variant="dot"
-                  sx={{ '& .MuiBadge-badge': { backgroundColor: '#10B981' } }}
-                >
-                  <Avatar sx={{ width: 32, height: 32, bgcolor: peer.color || '#6366F1', fontSize: '0.8rem', fontWeight: 700 }}>
-                    {peer.handle ? peer.handle.charAt(0).toUpperCase() : 'P'}
-                  </Avatar>
-                </Badge>
-
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                    {peer.handle} {peer.handle === handle && '(You)'}
-
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#10B981', fontSize: '0.68rem', fontWeight: 600 }}>
-                    🟢 Online
-                  </Typography>
-                </Box>
+                <Avatar sx={{ width: 28, height: 28, bgcolor: peer.color || '#6366F1', fontSize: '0.75rem', fontWeight: 700 }}>
+                  {peer.handle.charAt(0).toUpperCase()}
+                </Avatar>
+                <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                  {peer.handle} {peer.handle === handle ? '(You)' : ''}
+                </Typography>
               </Paper>
             ))}
           </Box>
@@ -299,21 +285,19 @@ export const RoomSidebar = ({ onCloseMobileDrawer }) => {
           <Typography variant="caption" sx={{ color: theme.palette.primary.main, fontWeight: 700 }}>Edit</Typography>
         </Paper>
 
-        {/* reCAPTCHA Shield Chip */}
+        {/* Security Indicator */}
         <Chip
           icon={<ShieldCheck size={14} color="#10B981" />}
-          label="reCAPTCHA v3 Active"
+          label="Protected Session"
           size="small"
-          onClick={() => {
-            setActiveModal('captcha');
-            if (onCloseMobileDrawer) onCloseMobileDrawer();
-          }}
           sx={{
-            fontSize: '0.72rem',
+            fontFamily: 'inherit',
+            fontWeight: 700,
+            fontSize: '0.75rem',
+            py: 1.5,
             bgcolor: 'rgba(16, 185, 129, 0.1)',
             color: '#10B981',
-            borderColor: 'rgba(16, 185, 129, 0.3)',
-            cursor: 'pointer',
+            border: '1px solid rgba(16, 185, 129, 0.25)',
           }}
           variant="outlined"
         />

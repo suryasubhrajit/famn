@@ -108,7 +108,7 @@ export const RoomLanding = () => {
               fontSize: { xs: '0.85rem', sm: '0.9rem' },
             }}
           >
-            No signups. No database tracking. Messages live strictly in temporary Redis memory with auto-expiration TTL.
+            Private 2-person chat. No signups required. Messages automatically vanish when your session ends.
           </Typography>
 
           {/* Action 1: Create Instant Room */}
@@ -200,14 +200,14 @@ export const RoomLanding = () => {
                   Session: {handle}
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.68rem' }}>
-                  Wiped when tab closes • reCAPTCHA v3
+                  Messages auto-expire when tab closes
                 </Typography>
               </Box>
             </Box>
 
             <Chip
               icon={<ShieldCheck size={12} color="#10B981" />}
-              label="No SQL"
+              label="Protected"
               size="small"
               sx={{ height: 20, fontSize: '0.65rem', color: '#10B981', bgcolor: 'rgba(16, 185, 129, 0.1)' }}
             />
