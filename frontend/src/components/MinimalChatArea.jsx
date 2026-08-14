@@ -62,6 +62,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
     mode,
     emitTyping,
     BACKEND_URL,
+    leaveRoom,
   } = useChat();
 
   const [text, setText] = useState('');
@@ -71,11 +72,35 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
   const [emojiPickerAnchor, setEmojiPickerAnchor] = useState(null);
   const [customReactionMsgId, setCustomReactionMsgId] = useState(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [soloCountdown, setSoloCountdown] = useState(60);
 
   const fileInputRef = useRef(null);
   const textInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const typingTimerRef = useRef(null);
+
+  // ── Solo countdown timer (60s) — auto fallback to landing if no 2nd user joins ──
+  const canChat = peers.length >= 2;
+  useEffect(() => {
+    if (canChat) {
+      // Reset timer whenever a 2nd person joins
+      setSoloCountdown(60);
+      return;
+    }
+    // Start countdown when alone in room
+    setSoloCountdown(60);
+    const interval = setInterval(() => {
+      setSoloCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          leaveRoom();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [canChat]);
 
   // Desktop Keyboard Shortcuts (Ctrl+/, Ctrl+., Alt+A/Ctrl+Shift+U, Esc)
   useEffect(() => {
@@ -120,9 +145,6 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
 
   // The other person in the room (not yourself)
   const partner = peers.find((p) => p.handle !== handle);
-
-  // Chat is only enabled when both participants have joined
-  const canChat = peers.length >= 2;
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   useEffect(() => { scrollToBottom(); }, [messages]);
@@ -426,8 +448,11 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
           <Paper elevation={0} sx={{
             p: 2.5, borderRadius: '16px', textAlign: 'center', position: 'relative', zIndex: 1,
             bgcolor: mode === 'dark' ? 'rgba(245,158,11,0.08)' : 'rgba(245,158,11,0.05)',
-            border: `1px solid rgba(245,158,11,0.3)`,
+            border: `1px solid ${
+              soloCountdown <= 10 ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.3)'
+            }`,
             mx: 'auto', width: '100%',
+            transition: 'border-color 0.5s ease',
             animation: 'fadeInWait 0.4s ease',
             '@keyframes fadeInWait': {
               '0%': { opacity: 0, transform: 'translateY(8px)' },
@@ -435,14 +460,47 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
             },
           }}>
             <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-              <Clock size={18} color="#F59E0B" />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#F59E0B', fontSize: '0.9rem' }}>
+              <Clock size={18} color={soloCountdown <= 10 ? '#EF4444' : '#F59E0B'} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: soloCountdown <= 10 ? '#EF4444' : '#F59E0B', fontSize: '0.9rem', transition: 'color 0.5s ease' }}>
                 Waiting for your partner to join…
               </Typography>
             </Box>
-            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.4, fontSize: '0.75rem' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.4, fontSize: '0.75rem', mb: 1.5 }}>
               Share the invite link or QR code from the sidebar. Chat unlocks when both of you are in the room.
             </Typography>
+            {/* Countdown ring + number */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
+              <Box sx={{ position: 'relative', width: 48, height: 48, flexShrink: 0 }}>
+                <svg width="48" height="48" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
+                  <circle
+                    cx="24" cy="24" r="20"
+                    fill="none"
+                    stroke={soloCountdown <= 10 ? '#EF4444' : '#F59E0B'}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 20}`}
+                    strokeDashoffset={`${2 * Math.PI * 20 * (1 - soloCountdown / 60)}`}
+                    style={{ transition: 'stroke-dashoffset 0.9s linear, stroke 0.5s ease' }}
+                  />
+                </svg>
+                <Typography
+                  sx={{
+                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 800, fontSize: '0.85rem',
+                    color: soloCountdown <= 10 ? '#EF4444' : '#F59E0B',
+                    transition: 'color 0.5s ease',
+                  }}
+                >
+                  {soloCountdown}s
+                </Typography>
+              </Box>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem', textAlign: 'left' }}>
+                {soloCountdown <= 10
+                  ? '⚠️ Room closing soon! No one joined.'
+                  : 'Room auto-closes if no one joins in time.'}
+              </Typography>
+            </Box>
           </Paper>
         )}
 
