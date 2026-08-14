@@ -9,7 +9,7 @@
 
 * 🔒 **Private & Ephemeral**: Zero SQL/NoSQL database storage. All room metadata and chat messages reside exclusively in memory / Redis cache with auto-expiration TTL.
 * 👥 **Strict 2-Person Room Lock**: Rooms automatically lock to a maximum of 2 participants per session. 3rd join attempts are rejected.
-* ⚡ **Google Meet Style Room Codes**: Clean path URLs (e.g. `famn.vercel.app/tsy-cusn-bti`).
+* ⚡ **Google Meet Style Room Codes**: Clean path URLs (e.g. `https://yofamn.vercel.app/tsy-cusn-bti`).
 * 🎨 **Redesigned Dual Speech Bubble Logo & Brand Identity**: Custom vector SVG logos, favicons, dark/light theme toggle.
 * ⏱️ **Auto-Destruction Lifecycles**: 5-minute fast auto-destruct when all participants leave a room.
 * ⌨️ **Desktop Keyboard Hotkeys**:
