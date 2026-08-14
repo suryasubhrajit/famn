@@ -28,8 +28,6 @@ import {
   Copy,
   Check,
   ShieldCheck,
-  Maximize2,
-  Minimize2,
 } from 'lucide-react';
 import { useChat } from '../../context/ChatContext';
 
@@ -50,8 +48,7 @@ export const FileViewerModal = () => {
   const [textFetchError, setTextFetchError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [wrapLines, setWrapLines] = useState(true);
-  const [fontSize, setFontSize] = useState(13);
-  const [bgGrid, setBgGrid] = useState(true);
+  const [fontSize] = useState(13);
 
   // Detect file type & category
   const getFileCategory = () => {
@@ -86,7 +83,7 @@ export const FileViewerModal = () => {
 
   // Reset controls when file changes
   useEffect(() => {
-    if (open) {
+    if (open && currentFile) {
       setZoom(1);
       setRotation(0);
       setImgDimensions(null);
@@ -94,7 +91,7 @@ export const FileViewerModal = () => {
       setTextFetchError(false);
       setCopied(false);
 
-      if (category === 'text' && currentFile?.url) {
+      if (category === 'text' && currentFile.url) {
         setLoadingText(true);
         fetch(currentFile.url)
           .then((res) => {
@@ -118,6 +115,11 @@ export const FileViewerModal = () => {
     setSelectedImage(null);
     setActiveModal(null);
   };
+
+  // If modal is closed or no file selected, return null so React doesn't evaluate inner JSX
+  if (!open || !currentFile) {
+    return null;
+  }
 
   const handleCopyText = () => {
     if (textContent) {
@@ -222,17 +224,21 @@ export const FileViewerModal = () => {
           {category === 'image' && (
             <>
               <Tooltip title="Zoom Out">
-                <IconButton size="small" onClick={handleZoomOut} disabled={zoom <= 0.5}>
-                  <ZoomOut size={18} />
-                </IconButton>
+                <span>
+                  <IconButton size="small" onClick={handleZoomOut} disabled={zoom <= 0.5}>
+                    <ZoomOut size={18} />
+                  </IconButton>
+                </span>
               </Tooltip>
               <Typography variant="caption" sx={{ minWidth: 36, textAlign: 'center', fontWeight: 700, fontSize: '0.75rem' }}>
                 {Math.round(zoom * 100)}%
               </Typography>
               <Tooltip title="Zoom In">
-                <IconButton size="small" onClick={handleZoomIn} disabled={zoom >= 3}>
-                  <ZoomIn size={18} />
-                </IconButton>
+                <span>
+                  <IconButton size="small" onClick={handleZoomIn} disabled={zoom >= 3}>
+                    <ZoomIn size={18} />
+                  </IconButton>
+                </span>
               </Tooltip>
               <Tooltip title="Rotate 90°">
                 <IconButton size="small" onClick={handleRotate}>
@@ -325,7 +331,7 @@ export const FileViewerModal = () => {
         }}
       >
         {/* IMAGE PREVIEWER */}
-        {category === 'image' && (
+        {category === 'image' && currentFile?.url && (
           <Box
             sx={{
               width: '100%',
@@ -356,7 +362,7 @@ export const FileViewerModal = () => {
         )}
 
         {/* PDF PREVIEWER */}
-        {category === 'pdf' && (
+        {category === 'pdf' && currentFile?.url && (
           <Box sx={{ width: '100%', height: '78vh', bgcolor: '#1E293B' }}>
             <iframe
               src={`${currentFile.url}#toolbar=1`}
@@ -369,7 +375,7 @@ export const FileViewerModal = () => {
         )}
 
         {/* VIDEO PREVIEWER */}
-        {category === 'video' && (
+        {category === 'video' && currentFile?.url && (
           <Box
             sx={{
               width: '100%',
@@ -395,7 +401,7 @@ export const FileViewerModal = () => {
         )}
 
         {/* AUDIO PREVIEWER */}
-        {category === 'audio' && (
+        {category === 'audio' && currentFile?.url && (
           <Paper
             elevation={0}
             sx={{
@@ -458,8 +464,8 @@ export const FileViewerModal = () => {
                 <Button
                   variant="contained"
                   component="a"
-                  href={currentFile.url}
-                  download={currentFile.name}
+                  href={currentFile?.url}
+                  download={currentFile?.name}
                   startIcon={<Download size={16} />}
                 >
                   Download File Instead
@@ -520,10 +526,10 @@ export const FileViewerModal = () => {
               {category === 'archive' ? <Package size={40} color="#8B5CF6" /> : <FileText size={40} color="#6366F1" />}
             </Box>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-              {currentFile.name}
+              {currentFile?.name}
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 2 }}>
-              {currentFile.size ? `File Size: ${currentFile.size}` : 'Attachment File'}
+              {currentFile?.size ? `File Size: ${currentFile.size}` : 'Attachment File'}
             </Typography>
 
             <Box
@@ -549,8 +555,8 @@ export const FileViewerModal = () => {
               <Button
                 variant="contained"
                 component="a"
-                href={currentFile.url}
-                download={currentFile.name}
+                href={currentFile?.url}
+                download={currentFile?.name}
                 startIcon={<Download size={18} />}
                 sx={{ borderRadius: '12px', fontWeight: 700, px: 3 }}
               >
@@ -559,7 +565,7 @@ export const FileViewerModal = () => {
               <Button
                 variant="outlined"
                 component="a"
-                href={currentFile.url}
+                href={currentFile?.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 startIcon={<ExternalLink size={18} />}
