@@ -27,7 +27,7 @@ const QUICK_EMOJIS = ['👍', '❤️', '🔥', '😂', '😍', '🚀'];
 
 export const MessageList = () => {
   const theme = useTheme();
-  const { messages, activeRoom, username, addReaction, setSelectedImage, setActiveModal, mode } = useChat();
+  const { messages, activeRoom, username, addReaction, setSelectedImage, setActiveModal, mode, openFileViewer } = useChat();
   const messagesEndRef = useRef(null);
 
   const roomMessages = messages.filter((m) => !m.roomId || m.roomId === activeRoom.id);
@@ -170,10 +170,7 @@ export const MessageList = () => {
                   <Box sx={{ mt: msg.content ? 1.5 : 0 }}>
                     {msg.file.type === 'image' ? (
                       <Box
-                        onClick={() => {
-                          setSelectedImage(msg.file.url);
-                          setActiveModal('lightbox');
-                        }}
+                        onClick={() => openFileViewer(msg.file)}
                         sx={{
                           position: 'relative',
                           borderRadius: '12px',
@@ -220,6 +217,7 @@ export const MessageList = () => {
                     ) : (
                       <Paper
                         elevation={0}
+                        onClick={() => openFileViewer(msg.file)}
                         sx={{
                           p: 1.5,
                           borderRadius: '12px',
@@ -228,6 +226,8 @@ export const MessageList = () => {
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           gap: 1.5,
+                          cursor: 'pointer',
+                          '&:hover': { opacity: 0.9 },
                         }}
                       >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>

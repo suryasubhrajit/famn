@@ -32,6 +32,7 @@ import {
   Reply,
   Clock,
   Keyboard,
+  Eye,
 } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 import { useChat } from '../context/ChatContext';
@@ -63,6 +64,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
     emitTyping,
     BACKEND_URL,
     leaveRoom,
+    openFileViewer,
   } = useChat();
 
   const [text, setText] = useState('');
@@ -651,38 +653,58 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
                   {msg.file && (
                     <Box sx={{ mt: msg.content ? 1.2 : 0 }}>
                       {msg.file.type === 'image' ? (
-                        <Box onClick={(e) => { e.stopPropagation(); setSelectedImage(msg.file.url); setActiveModal('lightbox'); }}
+                        <Box onClick={(e) => { e.stopPropagation(); openFileViewer(msg.file); }}
                           sx={{ borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', maxHeight: 260, transition: 'transform 0.25s ease', '&:hover': { transform: 'scale(1.01)' } }}>
                           <img src={msg.file.url} alt={msg.file.name}
                             style={{ width: '100%', maxHeight: 260, objectFit: 'cover', display: 'block' }} />
                         </Box>
                       ) : msg.file.type === 'video' ? (
-                        <Box sx={{ borderRadius: '12px', overflow: 'hidden', maxHeight: 280, bgcolor: '#000' }}>
-                          <video controls src={msg.file.url} style={{ width: '100%', maxHeight: 280, display: 'block' }} />
+                        <Box
+                          onClick={(e) => { e.stopPropagation(); openFileViewer(msg.file); }}
+                          sx={{ borderRadius: '12px', overflow: 'hidden', maxHeight: 280, bgcolor: '#000', cursor: 'pointer', position: 'relative' }}
+                        >
+                          <video src={msg.file.url} style={{ width: '100%', maxHeight: 280, display: 'block', pointerEvents: 'none' }} />
+                          <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.3)' }}>
+                            <Chip icon={<Eye size={14} color="#FFF" />} label="Click to view video sandbox" size="small" sx={{ bgcolor: 'rgba(0,0,0,0.7)', color: '#FFF', fontWeight: 700 }} />
+                          </Box>
                         </Box>
                       ) : (
-                        <Paper elevation={0} sx={{
-                          p: 1.2, borderRadius: '10px',
-                          bgcolor: isSelf ? 'rgba(255,255,255,0.15)' : theme.palette.background.subtle,
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5,
-                          transition: 'all 0.2s ease',
-                        }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Paper
+                          elevation={0}
+                          onClick={(e) => { e.stopPropagation(); openFileViewer(msg.file); }}
+                          sx={{
+                            p: 1.2, borderRadius: '10px',
+                            bgcolor: isSelf ? 'rgba(255,255,255,0.15)' : theme.palette.background.subtle,
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            '&:hover': { bgcolor: isSelf ? 'rgba(255,255,255,0.22)' : 'rgba(99,102,241,0.1)' },
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, overflow: 'hidden' }}>
                             <FileText size={22} color={isSelf ? '#fff' : theme.palette.primary.main} />
-                            <Box>
-                              <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.78rem', display: 'block' }}>
+                            <Box sx={{ overflow: 'hidden' }}>
+                              <Typography variant="caption" noWrap sx={{ fontWeight: 700, fontSize: '0.78rem', display: 'block' }}>
                                 {msg.file.name}
                               </Typography>
                               <Typography variant="caption" sx={{ fontSize: '0.68rem', opacity: 0.8 }}>
-                                {msg.file.size}
+                                {msg.file.size || 'Attachment'} • Click to view
                               </Typography>
                             </Box>
                           </Box>
-                          <IconButton size="small" component="a" href={msg.file.url} download={msg.file.name}
-                            onClick={(e) => e.stopPropagation()}
-                            sx={{ color: isSelf ? '#fff' : 'inherit', transition: 'transform 0.2s ease', '&:hover': { transform: 'scale(1.15)' } }}>
-                            <Download size={16} />
-                          </IconButton>
+                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                            <IconButton size="small"
+                              onClick={(e) => { e.stopPropagation(); openFileViewer(msg.file); }}
+                              sx={{ color: isSelf ? '#fff' : 'inherit' }}
+                            >
+                              <Eye size={16} />
+                            </IconButton>
+                            <IconButton size="small" component="a" href={msg.file.url} download={msg.file.name}
+                              onClick={(e) => e.stopPropagation()}
+                              sx={{ color: isSelf ? '#fff' : 'inherit', transition: 'transform 0.2s ease', '&:hover': { transform: 'scale(1.15)' } }}>
+                              <Download size={16} />
+                            </IconButton>
+                          </Box>
                         </Paper>
                       )}
                     </Box>

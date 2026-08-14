@@ -68,7 +68,20 @@ export const ChatProvider = ({ children }) => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [copySuccess, setCopySuccess] = useState(false);
+
+  const openFileViewer = (file) => {
+    if (!file) return;
+    if (typeof file === 'string') {
+      setSelectedFile({ url: file, name: 'Attachment', type: 'image' });
+      setSelectedImage(file);
+    } else {
+      setSelectedFile(file);
+      if (file.url) setSelectedImage(file.url);
+    }
+    setActiveModal('lightbox');
+  };
 
   // ── Verify Room Existence & Format on Mount or Direct Navigation ───────────
   useEffect(() => {
@@ -544,6 +557,9 @@ export const ChatProvider = ({ children }) => {
         setActiveModal,
         selectedImage,
         setSelectedImage,
+        selectedFile,
+        setSelectedFile,
+        openFileViewer,
       }}
     >
       {children}
