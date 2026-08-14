@@ -22,7 +22,7 @@ export const handleFileUpload = (req, res) => {
 
 export const handleFileDownload = (req, res) => {
   const filename = req.params.filename || req.query.filename;
-  const originalName = req.query.name || filename;
+  let originalName = req.query.name || filename;
 
   if (!filename) {
     return res.status(400).json({ error: 'Filename is required' });
@@ -36,7 +36,13 @@ export const handleFileDownload = (req, res) => {
     return res.status(404).json({ error: 'File not found or has auto-expired' });
   }
 
-  // Set headers to force in-browser download
+  // Ensure originalName preserves file extension if not present
+  const ext = path.extname(safeFilename);
+  if (ext && !path.extname(originalName)) {
+    originalName += ext;
+  }
+
+  // Set headers to force in-browser download with clean filename
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
   res.download(filePath, originalName, (err) => {

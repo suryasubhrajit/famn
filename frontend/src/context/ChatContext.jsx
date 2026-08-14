@@ -83,7 +83,7 @@ export const ChatProvider = ({ children }) => {
     setActiveModal('lightbox');
   };
 
-  // Helper to force in-browser file download directly without opening/redirecting to cross-origin URLs
+  // Helper to force in-browser file download directly with original filename & extension
   const downloadFileDirectly = async (fileUrl, fileName) => {
     if (!fileUrl) return;
 
@@ -94,21 +94,34 @@ export const ChatProvider = ({ children }) => {
     }
 
     const rawFilename = cleanUrl.split('/uploads/').pop() || cleanUrl.split('/').pop();
+
+    // Resolve clean download filename preserving original extension
+    let downloadName = fileName && fileName !== 'Attachment' ? fileName : rawFilename;
+    const ext = (rawFilename.split('.').pop() || '').toLowerCase();
+    if (ext && !downloadName.includes('.')) {
+      downloadName += `.${ext}`;
+    }
+
     const safeBackendUrl = BACKEND_URL.replace(/^http:\/\//, 'https://');
-    const downloadApiUrl = `${safeBackendUrl}/api/download/${rawFilename}?name=${encodeURIComponent(fileName || rawFilename)}`;
+    const downloadApiUrl = `${safeBackendUrl}/api/download/${rawFilename}?name=${encodeURIComponent(downloadName)}`;
 
     // Try fetching binary blob directly
     try {
       const targetUrl = cleanUrl.includes('/uploads/') ? downloadApiUrl : cleanUrl;
       const response = await fetch(targetUrl, { mode: 'cors' });
       if (response.ok) {
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
+        const rawBlob = await response.blob();
+
+        // Ensure proper MIME type so browser doesn't name it by blob GUID
+        const mimeType = response.headers.get('content-type') || rawBlob.type || 'application/octet-stream';
+        const typedBlob = new Blob([rawBlob], { type: mimeType });
+        const blobUrl = window.URL.createObjectURL(typedBlob);
 
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = blobUrl;
-        a.download = fileName || rawFilename || 'download';
+        a.setAttribute('download', downloadName);
+        a.download = downloadName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
