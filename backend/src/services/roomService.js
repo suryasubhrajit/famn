@@ -91,23 +91,29 @@ export const storeMessage = async (roomId, message) => {
   memoryRoomMessages.get(roomId).push(message);
 };
 
+// Purge/Delete room immediately from Redis and Memory
+export const deleteRoom = async (roomId) => {
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      await redis.del(`room:${roomId}:meta`, `room:${roomId}:messages`);
+      console.log(`[Room Purged] Room ${roomId} deleted from Redis.`);
+    } catch (err) {
+      console.error('[Room Purge Error]', err.message);
+    }
+  }
+  memoryRoomMeta.delete(roomId);
+  memoryRoomMessages.delete(roomId);
+};
+
 // Handle room empty / user disconnect inactivity cleanup
 export const handleRoomParticipantChange = async (roomId, activeParticipantCount) => {
   const redis = getRedisClient();
 
   if (activeParticipantCount === 0) {
-    // Fast auto-destruction when all users leave (e.g. 5 minutes or 300 seconds)
-    const emptyTtlSeconds = 300; 
-
-    if (redis) {
-      try {
-        await redis.expire(`room:${roomId}:messages`, emptyTtlSeconds);
-        await redis.expire(`room:${roomId}:meta`, emptyTtlSeconds);
-        console.log(`[Room Auto-Destruct Scheduled] Room ${roomId} is empty. Destructing in 5m.`);
-      } catch (err) {
-        console.error('[RoomService Auto-Destruct Error]', err.message);
-      }
-    }
+    // Immediately delete room if all participants leave
+    await deleteRoom(roomId);
+    console.log(`[Room Auto-Destruct] Room ${roomId} is empty (0 peers). Purged immediately.`);
   } else {
     // Users are active in room, refresh room TTL
     if (redis) {

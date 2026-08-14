@@ -194,6 +194,16 @@ export const ChatProvider = ({ children }) => {
       setPeers([]);
     });
 
+    // Handle room expired (e.g. 1-minute solo timeout or room destroyed)
+    newSocket.on('room:expired', ({ message }) => {
+      console.warn('[Room Expired Socket Event]', message);
+      setRoomNoticeAlert(message || 'Room expired because no second participant joined within 1 minute.');
+      window.history.replaceState(null, '', '/');
+      setRoomId(null);
+      setMessages([]);
+      setPeers([]);
+    });
+
     newSocket.on('room:peers', (peerList) => {
       if (peerList && Array.isArray(peerList)) {
         const seen = new Set();

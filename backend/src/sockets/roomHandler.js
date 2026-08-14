@@ -1,5 +1,43 @@
-import { storeMessage, handleRoomParticipantChange } from '../services/roomService.js';
+import { storeMessage, handleRoomParticipantChange, deleteRoom } from '../services/roomService.js';
 import { generateFriendlyHandle, isValidRoomId } from '../utils/generators.js';
+
+// Server-side map storing 1-minute solo waiting timers per roomId
+const soloRoomTimers = new Map();
+
+// Helper to manage 1-minute solo room auto-destruct timer
+const updateSoloRoomTimer = (io, roomId, peerCount) => {
+  if (!roomId) return;
+
+  if (peerCount === 1) {
+    // If no solo timer is active for this room, start 60s countdown
+    if (!soloRoomTimers.has(roomId)) {
+      console.log(`[Solo Timer Started] Room ${roomId} has 1 participant. Starting 60s auto-destruct timer.`);
+      const timer = setTimeout(async () => {
+        console.log(`[Solo Timeout Expired] Room ${roomId} remained at 1 participant for 60s. Purging room.`);
+        soloRoomTimers.delete(roomId);
+
+        // Broadcast expiration event to lone user
+        io.to(roomId).emit('room:expired', {
+          roomId,
+          reason: 'solo_timeout',
+          message: `Room #${roomId} expired because no second participant joined within 1 minute.`,
+        });
+
+        // Delete room from Redis & Memory
+        await deleteRoom(roomId);
+      }, 60 * 1000); // 60 Seconds (1 Minute)
+
+      soloRoomTimers.set(roomId, timer);
+    }
+  } else {
+    // If peerCount >= 2 or 0, cancel solo timer
+    if (soloRoomTimers.has(roomId)) {
+      console.log(`[Solo Timer Cancelled] Room ${roomId} now has ${peerCount} participants. Clearing 60s timer.`);
+      clearTimeout(soloRoomTimers.get(roomId));
+      soloRoomTimers.delete(roomId);
+    }
+  }
+};
 
 export const registerRoomSocketHandlers = (io, socket) => {
   // 1. Join Room Event (Enforces strict max 2 participants & 3-4-3 room code format)
@@ -57,8 +95,9 @@ export const registerRoomSocketHandlers = (io, socket) => {
 
     const peerCount = peers.length;
 
-    // Refresh room TTL because participants are present
+    // Refresh room TTL & update 1-minute solo timer
     await handleRoomParticipantChange(roomId, peerCount);
+    updateSoloRoomTimer(io, roomId, peerCount);
 
     io.to(roomId).emit('room:peers', peers);
     console.log(`[Socket Join] ${validHandle} joined room: ${roomId} (Active: ${peerCount}/2)`);
@@ -134,8 +173,10 @@ export const registerRoomSocketHandlers = (io, socket) => {
     const peerCount = peers.length;
     io.to(roomId).emit('room:peers', peers);
 
-    // Schedule fast auto-destruct TTL if room is now empty
+    // Schedule fast auto-destruct TTL & manage solo 1-minute timer
     await handleRoomParticipantChange(roomId, peerCount);
+    updateSoloRoomTimer(io, roomId, peerCount);
+
     console.log(`[Socket Left] ${socket.data.handle} left room: ${roomId} (Remaining: ${peerCount})`);
   };
 
