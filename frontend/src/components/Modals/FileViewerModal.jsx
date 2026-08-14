@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Paper,
   useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   X,
@@ -33,6 +34,7 @@ import { useChat } from '../../context/ChatContext';
 
 export const FileViewerModal = () => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { activeModal, setActiveModal, selectedFile, setSelectedFile, selectedImage, setSelectedImage, mode } = useChat();
 
   // Support both selectedFile object and legacy selectedImage string
@@ -116,7 +118,7 @@ export const FileViewerModal = () => {
     setActiveModal(null);
   };
 
-  // If modal is closed or no file selected, return null so React doesn't evaluate inner JSX
+  // Guard return null when closed
   if (!open || !currentFile) {
     return null;
   }
@@ -150,27 +152,29 @@ export const FileViewerModal = () => {
     <Dialog
       open={open}
       onClose={handleClose}
+      fullScreen={isMobile}
       maxWidth={category === 'pdf' || category === 'text' ? 'lg' : 'md'}
       fullWidth
       PaperProps={{
         sx: {
           bgcolor: mode === 'dark' ? '#0F172A' : '#FFFFFF',
           color: mode === 'dark' ? '#F8FAFC' : '#0F172A',
-          borderRadius: '20px',
+          borderRadius: isMobile ? 0 : '20px',
           overflow: 'hidden',
-          boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
-          maxHeight: '92vh',
+          boxShadow: isMobile ? 'none' : '0 24px 60px rgba(0,0,0,0.5)',
+          maxHeight: isMobile ? '100vh' : '92vh',
+          height: isMobile ? '100vh' : 'auto',
           display: 'flex',
           flexDirection: 'column',
-          border: `1px solid ${mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+          border: isMobile ? 'none' : `1px solid ${mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
         },
       }}
     >
       {/* ── Sandbox Header Bar ── */}
       <Box
         sx={{
-          px: 2.5,
-          py: 1.5,
+          px: { xs: 1.8, sm: 2.5 },
+          py: 1.2,
           display: 'flex',
           alignItems: 'center',
           justify: 'space-between',
@@ -181,23 +185,23 @@ export const FileViewerModal = () => {
         }}
       >
         {/* Left: Icon, Filename & Meta Tag */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, overflow: 'hidden', mr: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, overflow: 'hidden', mr: 1 }}>
           {renderIcon()}
           <Box sx={{ overflow: 'hidden' }}>
             <Typography
               variant="subtitle2"
               noWrap
-              sx={{ fontWeight: 700, fontSize: '0.9rem', maxWidth: { xs: 180, sm: 340 } }}
+              sx={{ fontWeight: 700, fontSize: { xs: '0.82rem', sm: '0.9rem' }, maxWidth: { xs: 140, sm: 340 } }}
             >
               {currentFile?.name || 'Attachment'}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mt: 0.2 }}>
               <Chip
                 label={category.toUpperCase()}
                 size="small"
                 sx={{
                   height: 18,
-                  fontSize: '0.62rem',
+                  fontSize: '0.6rem',
                   fontWeight: 800,
                   bgcolor: 'rgba(99,102,241,0.12)',
                   color: '#6366F1',
@@ -205,12 +209,12 @@ export const FileViewerModal = () => {
                 }}
               />
               {currentFile?.size && (
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
                   {currentFile.size}
                 </Typography>
               )}
               {imgDimensions && (
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
                   • {imgDimensions.width} × {imgDimensions.height} px
                 </Typography>
               )}
@@ -219,7 +223,7 @@ export const FileViewerModal = () => {
         </Box>
 
         {/* Right: Sandbox Controls */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {/* Zoom controls for Image */}
           {category === 'image' && (
             <>
@@ -230,7 +234,7 @@ export const FileViewerModal = () => {
                   </IconButton>
                 </span>
               </Tooltip>
-              <Typography variant="caption" sx={{ minWidth: 36, textAlign: 'center', fontWeight: 700, fontSize: '0.75rem' }}>
+              <Typography variant="caption" sx={{ minWidth: 32, textAlign: 'center', fontWeight: 700, fontSize: '0.75rem' }}>
                 {Math.round(zoom * 100)}%
               </Typography>
               <Tooltip title="Zoom In">
@@ -316,13 +320,14 @@ export const FileViewerModal = () => {
       <Box
         sx={{
           flex: 1,
+          width: '100%',
           overflow: 'auto',
-          p: category === 'image' || category === 'pdf' || category === 'video' ? 0 : 3,
+          p: category === 'image' || category === 'pdf' || category === 'video' ? 0 : { xs: 2, sm: 3 },
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justify: 'center',
-          minHeight: 360,
+          minHeight: isMobile ? 'calc(100vh - 60px)' : 360,
           bgcolor:
             category === 'image'
               ? mode === 'dark' ? '#070B14' : '#F1F5F9'
@@ -330,18 +335,21 @@ export const FileViewerModal = () => {
           position: 'relative',
         }}
       >
-        {/* IMAGE PREVIEWER */}
+        {/* IMAGE PREVIEWER - Perfectly Centered Responsive Container */}
         {category === 'image' && currentFile?.url && (
           <Box
             sx={{
               width: '100%',
-              minHeight: '65vh',
-              maxHeight: '78vh',
+              height: '100%',
+              flex: 1,
+              minHeight: isMobile ? 'calc(100vh - 60px)' : '60vh',
+              maxHeight: isMobile ? 'calc(100vh - 60px)' : '78vh',
               display: 'flex',
               alignItems: 'center',
               justify: 'center',
               overflow: 'auto',
-              p: 2,
+              p: { xs: 2, sm: 3 },
+              position: 'relative',
             }}
           >
             <img
@@ -349,13 +357,15 @@ export const FileViewerModal = () => {
               alt={currentFile.name || 'Image'}
               onLoad={(e) => setImgDimensions({ width: e.target.naturalWidth, height: e.target.naturalHeight })}
               style={{
-                maxWidth: '100%',
-                maxHeight: '75vh',
+                maxWidth: '92%',
+                maxHeight: isMobile ? '82vh' : '72vh',
                 objectFit: 'contain',
                 borderRadius: '12px',
                 transform: `scale(${zoom}) rotate(${rotation}deg)`,
                 transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+                boxShadow: mode === 'dark' ? '0 12px 40px rgba(0,0,0,0.6)' : '0 12px 30px rgba(0,0,0,0.12)',
+                margin: 'auto',
+                display: 'block',
               }}
             />
           </Box>
@@ -363,7 +373,7 @@ export const FileViewerModal = () => {
 
         {/* PDF PREVIEWER */}
         {category === 'pdf' && currentFile?.url && (
-          <Box sx={{ width: '100%', height: '78vh', bgcolor: '#1E293B' }}>
+          <Box sx={{ width: '100%', height: isMobile ? 'calc(100vh - 60px)' : '78vh', bgcolor: '#1E293B' }}>
             <iframe
               src={`${currentFile.url}#toolbar=1`}
               title={currentFile.name || 'PDF Document'}
@@ -379,7 +389,10 @@ export const FileViewerModal = () => {
           <Box
             sx={{
               width: '100%',
-              maxHeight: '78vh',
+              height: '100%',
+              flex: 1,
+              minHeight: isMobile ? 'calc(100vh - 60px)' : '60vh',
+              maxHeight: isMobile ? 'calc(100vh - 60px)' : '78vh',
               display: 'flex',
               alignItems: 'center',
               justify: 'center',
@@ -393,8 +406,10 @@ export const FileViewerModal = () => {
               src={currentFile.url}
               style={{
                 maxWidth: '100%',
-                maxHeight: '75vh',
+                maxHeight: isMobile ? '85vh' : '75vh',
                 borderRadius: '12px',
+                margin: 'auto',
+                display: 'block',
               }}
             />
           </Box>
@@ -405,7 +420,7 @@ export const FileViewerModal = () => {
           <Paper
             elevation={0}
             sx={{
-              p: 4,
+              p: { xs: 3, sm: 4 },
               borderRadius: '24px',
               textAlign: 'center',
               maxWidth: 460,
@@ -413,6 +428,7 @@ export const FileViewerModal = () => {
               bgcolor: mode === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.9)',
               border: `1px solid ${theme.palette.divider}`,
               backdropFilter: 'blur(12px)',
+              my: 'auto',
             }}
           >
             <Box
@@ -448,7 +464,7 @@ export const FileViewerModal = () => {
 
         {/* TEXT & CODE PREVIEWER */}
         {category === 'text' && (
-          <Box sx={{ width: '100%', height: '75vh', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ width: '100%', height: isMobile ? 'calc(100vh - 60px)' : '75vh', display: 'flex', flexDirection: 'column' }}>
             {loadingText ? (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 2 }}>
                 <CircularProgress size={28} />
@@ -500,7 +516,7 @@ export const FileViewerModal = () => {
           <Paper
             elevation={0}
             sx={{
-              p: 4,
+              p: { xs: 3, sm: 4 },
               borderRadius: '24px',
               textAlign: 'center',
               maxWidth: 480,
@@ -508,6 +524,7 @@ export const FileViewerModal = () => {
               bgcolor: mode === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.9)',
               border: `1px solid ${theme.palette.divider}`,
               backdropFilter: 'blur(12px)',
+              my: 'auto',
             }}
           >
             <Box
