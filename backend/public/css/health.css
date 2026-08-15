@@ -433,11 +433,11 @@ body.locked .container {
 }
 
 .tab-pane {
-  display: none;
+  display: none !important;
 }
 
 .tab-pane.active {
-  display: block;
+  display: block !important;
 }
 
 /* Segmented 6-digit PIN Input */

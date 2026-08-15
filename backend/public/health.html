@@ -20,9 +20,9 @@
 
       <!-- Vault Tab Controls -->
       <div class="vault-tabs">
-        <button id="tab-btn-totp" class="vault-tab active" onclick="switchTab('totp')">🔑 Google 2FA</button>
-        <button id="tab-btn-bio" class="vault-tab" onclick="switchTab('bio')">👆 Biometrics</button>
-        <button id="tab-btn-pass" class="vault-tab" onclick="switchTab('pass')">🔒 Password</button>
+        <button type="button" id="tab-btn-totp" class="vault-tab active" onclick="switchTab('totp')">🔑 Google 2FA</button>
+        <button type="button" id="tab-btn-bio" class="vault-tab" onclick="switchTab('bio')">👆 Biometrics</button>
+        <button type="button" id="tab-btn-pass" class="vault-tab" onclick="switchTab('pass')">🔒 Password</button>
       </div>
 
       <!-- Tab 1: Google Authenticator TOTP -->
@@ -239,15 +239,22 @@
   <script>
     const AUTH_KEY = 'famn_health_authenticated';
 
-    const switchTab = (tab) => {
+    window.switchTab = (tab) => {
       document.querySelectorAll('.vault-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-      document.getElementById(`tab-btn-${tab}`).classList.add('active');
-      document.getElementById(`pane-${tab}`).classList.add('active');
-      document.getElementById('auth-error').style.display = 'none';
+      
+      const targetBtn = document.getElementById(`tab-btn-${tab}`);
+      const targetPane = document.getElementById(`pane-${tab}`);
+
+      if (targetBtn) targetBtn.classList.add('active');
+      if (targetPane) targetPane.classList.add('active');
+      
+      const errEl = document.getElementById('auth-error');
+      if (errEl) errEl.style.display = 'none';
 
       if (tab === 'totp') {
-        document.getElementById('pin-1').focus();
+        const p1 = document.getElementById('pin-1');
+        if (p1) p1.focus();
       }
     };
 
