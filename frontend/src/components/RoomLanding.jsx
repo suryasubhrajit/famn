@@ -10,18 +10,35 @@ import {
   Chip,
   Paper,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
   useTheme,
 } from '@mui/material';
-import { ShieldCheck, Zap, ArrowRight, Lock, AlertCircle } from 'lucide-react';
+import {
+  ShieldCheck,
+  Zap,
+  ArrowRight,
+  Lock,
+  AlertCircle,
+  FileText,
+  X,
+  Menu as MenuIcon,
+  Globe,
+  ExternalLink,
+} from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
-export const RoomLanding = () => {
+export const RoomLanding = ({ onOpenMobileDrawer }) => {
   const theme = useTheme();
   const { createNewRoom, joinRoom, handle, mode, roomNoticeAlert, setRoomNoticeAlert } = useChat();
   const [joinInput, setJoinInput] = useState('');
   const [joining, setJoining] = useState(false);
+  const [legalModal, setLegalModal] = useState(null); // 'privacy' | 'terms' | 'security' | null
 
   const handleJoin = async (e) => {
     if (e) {
@@ -41,26 +58,40 @@ export const RoomLanding = () => {
   return (
     <Box
       sx={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: { xs: 2, sm: 3 },
-        bgcolor: theme.palette.background.default,
+        width: '100%',
+        height: '100%',
         overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        p: { xs: 2, sm: 4 },
+        pb: { xs: '60px', sm: 6 },
+        bgcolor: theme.palette.background.default,
       }}
     >
+      {/* Mobile Top Bar (Drawer opener for mobile) */}
+      <Box sx={{ width: '100%', maxWidth: 680, display: { xs: 'flex', md: 'none' }, alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <IconButton onClick={onOpenMobileDrawer} size="small" sx={{ p: 0.8, bgcolor: 'background.paper', border: `1px solid ${theme.palette.divider}` }}>
+          <MenuIcon size={20} />
+        </IconButton>
+        <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', letterSpacing: '0.05em' }}>
+          SHAADOW PLATFORMS
+        </Typography>
+      </Box>
+
+      {/* Main Action Card */}
       <Card
         elevation={0}
         sx={{
-          maxWidth: 520,
+          maxWidth: 540,
           width: '100%',
           borderRadius: { xs: '20px', sm: '24px' },
           bgcolor: theme.palette.background.paper,
           border: `1px solid ${theme.palette.divider}`,
           boxShadow: mode === 'dark' ? '0 12px 40px rgba(0, 0, 0, 0.4)' : '0 12px 30px rgba(0, 0, 0, 0.05)',
           overflow: 'hidden',
-          my: 'auto',
+          my: { xs: 0, md: 'auto' },
         }}
       >
         <CardContent sx={{ p: { xs: 2.5, sm: 4 }, textAlign: 'center' }}>
@@ -280,6 +311,222 @@ export const RoomLanding = () => {
           </Paper>
         </CardContent>
       </Card>
+
+      {/* ── Shaadow Platforms Ecosystem Footer ── */}
+      <Box
+        component="footer"
+        sx={{
+          mt: 4,
+          mb: 2,
+          maxWidth: 540,
+          width: '100%',
+          color: 'text.secondary',
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2.5, sm: 3 },
+            borderRadius: '20px',
+            bgcolor: mode === 'dark' ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.7)',
+            backdropFilter: 'blur(12px)',
+            border: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          {/* Grid Section */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1.2fr 1fr' }, gap: 3, mb: 2.5 }}>
+            {/* Column 1: Shaadow Platforms */}
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <ShieldCheck size={18} color={theme.palette.primary.main} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '-0.01em' }}>
+                  Shaadow Platforms
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ fontSize: '0.78rem', color: 'text.secondary', lineHeight: 1.45, mb: 1.5 }}>
+                Engineering privacy-first, ephemeral communication tools and WebRTC peer-to-peer protocols.
+              </Typography>
+
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
+                <Chip label="FAMN v2.5" size="small" sx={{ height: 22, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'primary.main', color: '#fff' }} />
+                <Chip
+                  label="Boofer App"
+                  size="small"
+                  component="a"
+                  href="https://play.google.com/store/apps/details?id=com.shaadow.boofer.android"
+                  target="_blank"
+                  clickable
+                  sx={{ height: 22, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'rgba(0, 163, 255, 0.15)', color: '#00A3FF' }}
+                />
+                <Chip label="PulseP2P Core" size="small" sx={{ height: 22, fontSize: '0.68rem', fontWeight: 700, bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
+              </Box>
+            </Box>
+
+            {/* Column 2: Ecosystem & Legal Links */}
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '0.08em', display: 'block', mb: 1.2 }}>
+                LEGAL & SECURITY
+              </Typography>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
+                <Button
+                  size="small"
+                  onClick={() => setLegalModal('privacy')}
+                  startIcon={<Lock size={14} />}
+                  sx={{ justifyContent: 'flex-start', p: 0, textTransform: 'none', color: 'text.secondary', fontSize: '0.78rem', fontWeight: 600, '&:hover': { color: 'primary.main' } }}
+                >
+                  Privacy Policy & Zero-Logs
+                </Button>
+
+                <Button
+                  size="small"
+                  onClick={() => setLegalModal('terms')}
+                  startIcon={<FileText size={14} />}
+                  sx={{ justifyContent: 'flex-start', p: 0, textTransform: 'none', color: 'text.secondary', fontSize: '0.78rem', fontWeight: 600, '&:hover': { color: 'primary.main' } }}
+                >
+                  Terms of Service
+                </Button>
+
+                <Button
+                  size="small"
+                  onClick={() => setLegalModal('security')}
+                  startIcon={<ShieldCheck size={14} />}
+                  sx={{ justifyContent: 'flex-start', p: 0, textTransform: 'none', color: 'text.secondary', fontSize: '0.78rem', fontWeight: 600, '&:hover': { color: 'primary.main' } }}
+                >
+                  Security Specs & Protocols
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* Bottom Copyright Row */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+            <Typography variant="caption" sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+              © 2026 Shaadow Platforms. All rights reserved.
+            </Typography>
+
+            <Typography variant="caption" sx={{ fontSize: '0.72rem', color: 'text.secondary', fontWeight: 600 }}>
+              🔒 Ephemeral Memory Protocol
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
+
+      {/* ── Legal & Security Dialog ── */}
+      <Dialog
+        open={Boolean(legalModal)}
+        onClose={() => setLegalModal(null)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            bgcolor: theme.palette.background.paper,
+            p: 1,
+          },
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {legalModal === 'privacy' && <Lock size={20} color="#10B981" />}
+            {legalModal === 'terms' && <FileText size={20} color="#6366F1" />}
+            {legalModal === 'security' && <ShieldCheck size={20} color="#00A3FF" />}
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+              {legalModal === 'privacy' && 'Privacy Policy & Zero-Logs Policy'}
+              {legalModal === 'terms' && 'Terms of Service'}
+              {legalModal === 'security' && 'Security & Encryption Specs'}
+            </Typography>
+          </Box>
+          <IconButton onClick={() => setLegalModal(null)} size="small">
+            <X size={18} />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ borderColor: theme.palette.divider }}>
+          {legalModal === 'privacy' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                1. Zero Data Retention Architecture
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                Fun At Mid Night (FAMN) by Shaadow Platforms operates on a strict zero-retention ephemeral architecture. Messages exchanged during temporary chat sessions are retained exclusively in volatile RAM and WebRTC peer data channels.
+              </Typography>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                2. Immediate Destruction Upon Room Closure
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                Once both users leave a chat room, or after a 5-minute empty room grace period, backend Redis keys and socket queues automatically destroy all message history. No chat transcripts are stored to persistent disks or external databases.
+              </Typography>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                3. No Registration & No Tracking
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                Users do not register accounts, provide email addresses, or submit phone numbers. No persistent tracking cookies or third-party behavioral analytics scripts are embedded.
+              </Typography>
+            </Box>
+          )}
+
+          {legalModal === 'terms' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                1. Acceptance of Terms
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                By accessing or using Fun At Mid Night and Shaadow Platforms communication tools, you agree to comply with these terms and all applicable laws.
+              </Typography>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                2. Acceptable Use Policy
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                You agree not to use the platform to transmit unlawful material, perform malicious network disruption, or distribute illegal content. Shaadow Platforms reserves the right to terminate abusive rate-limited connections.
+              </Typography>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                3. Service Availability
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                Services are provided on an "as-is" and "as-available" basis without warranties of uninterrupted availability.
+              </Typography>
+            </Box>
+          )}
+
+          {legalModal === 'security' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                1. WebRTC Peer-to-Peer Encryption
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                Direct communication channels between room participants leverage WebRTC DTLS-SRTP end-to-end transport layer encryption.
+              </Typography>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                2. Temporary Session Keys
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                Cryptographic session keys are generated dynamically per room session and discarded immediately upon termination.
+              </Typography>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                3. Automated Rate Limiting
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                API endpoints are protected by automated IP rate limiting and collision-free room ID verification.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2 }}>
+          <Button variant="contained" size="small" onClick={() => setLegalModal(null)} sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

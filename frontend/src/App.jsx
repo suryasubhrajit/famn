@@ -57,10 +57,9 @@ const AppLayout = () => {
         {/* Main Workspace (Right Column) */}
         <Box sx={{
           flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden',
-          // When in a room: fill the entire right column
-          // When on landing: center the card both vertically and horizontally
-          alignItems: roomId ? 'stretch' : 'center',
-          justifyContent: roomId ? 'stretch' : 'center',
+          width: '100%', height: '100%',
+          alignItems: 'stretch',
+          justifyContent: 'stretch',
         }}>
           {roomId ? (
             <MinimalChatArea onOpenMobileDrawer={toggleMobileDrawer} />
