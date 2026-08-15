@@ -1,7 +1,7 @@
 import path from 'path';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const otplib = require('otplib');
+const { verify: totpVerify } = require('otplib');
 import { getRedisClient } from '../config/redis.js';
 import { mongoPoolManager } from '../config/mongoMultiDb.js';
 import { getTelemetryKpis } from '../services/roomService.js';
@@ -26,9 +26,9 @@ export const verifyHealthPassword = (req, res) => {
   });
 };
 
-export const verifyHealthTotp = (req, res) => {
+export const verifyHealthTotp = async (req, res) => {
   const { code } = req.body || {};
-  const secret = process.env.TOTP_SECRET || 'JBSWY3DPEHPK3PXP';
+  const secret = process.env.TOTP_SECRET || 'GUJSJQQLO336MOA3ZW4L6ZPCZOMBLIF5';
 
   if (!code) {
     return res.status(400).json({ success: false, error: 'Please enter a 6-digit TOTP code' });
@@ -40,11 +40,10 @@ export const verifyHealthTotp = (req, res) => {
       return res.status(400).json({ success: false, error: 'Please enter a valid 6-digit code' });
     }
 
-    // Configure 1-step (30s) window tolerance for phone/server clock drift
-    otplib.authenticator.options = { window: 1 };
-    const isValid = otplib.authenticator.check(cleanCode, secret);
+    // otplib v13: uses verify({ secret, token, window }) API
+    const result = await totpVerify({ secret, token: cleanCode, window: 1 });
 
-    if (!isValid) {
+    if (!result || !result.valid) {
       return res.status(401).json({ success: false, error: 'Invalid 6-digit Google Authenticator code.' });
     }
 
@@ -55,7 +54,7 @@ export const verifyHealthTotp = (req, res) => {
     });
   } catch (err) {
     console.error('[TOTP Verification Error]', err);
-    return res.status(401).json({ success: false, error: 'Failed to verify TOTP code: ' + err.message });
+    return res.status(401).json({ success: false, error: 'Invalid TOTP code. Check your Google Authenticator app.' });
   }
 };
 
