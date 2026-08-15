@@ -5,6 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { initRedis } from './config/redis.js';
+import { initMongoPool } from './config/mongoMultiDb.js';
 import { UPLOADS_DIR } from './config/multer.js';
 import apiRoutes from './routes/index.js';
 import { registerRoomSocketHandlers } from './sockets/roomHandler.js';
@@ -16,8 +17,9 @@ app.set('trust proxy', 1);
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 5000;
 
-// Initialize Upstash Redis / Memory Client
+// Initialize Storage Engines (Upstash Redis & MongoDB Atlas Multi-Cluster)
 initRedis();
+initMongoPool();
 
 // Express Middlewares
 app.use(cors({ origin: '*', credentials: true }));
