@@ -184,7 +184,10 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (el) {
-      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      const timer = setTimeout(() => {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      }, 50);
+      return () => clearTimeout(timer);
     }
   }, [messages]);
 
@@ -459,7 +462,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
           height: '100%',
           overflowY: 'auto',
           p: { xs: 1.5, sm: 3 },
-          pb: { xs: '80px', sm: 3 },
+          pb: { xs: 'calc(120px + env(safe-area-inset-bottom, 0px))', sm: 3 },
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
