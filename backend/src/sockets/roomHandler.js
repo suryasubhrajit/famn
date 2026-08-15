@@ -1,38 +1,38 @@
 import { storeMessage, handleRoomParticipantChange, deleteRoom, getRoomMessages } from '../services/roomService.js';
 import { generateFriendlyHandle, isValidRoomId } from '../utils/generators.js';
 
-// Server-side map storing 1-minute solo waiting timers per roomId
+// Server-side map storing 5-minute solo waiting timers per roomId
 const soloRoomTimers = new Map();
 
-// Helper to manage 1-minute solo room auto-destruct timer
+// Helper to manage 5-minute solo room auto-destruct timer
 const updateSoloRoomTimer = (io, roomId, peerCount) => {
   if (!roomId) return;
 
   if (peerCount === 1) {
-    // If no solo timer is active for this room, start 60s countdown
+    // If no solo timer is active for this room, start 5-minute countdown
     if (!soloRoomTimers.has(roomId)) {
-      console.log(`[Solo Timer Started] Room ${roomId} has 1 participant. Starting 60s auto-destruct timer.`);
+      console.log(`[Solo Timer Started] Room ${roomId} has 1 participant. Starting 5-minute (300s) auto-destruct timer.`);
       const timer = setTimeout(async () => {
-        console.log(`[Solo Timeout Expired] Room ${roomId} remained at 1 participant for 60s. Purging room.`);
+        console.log(`[Solo Timeout Expired] Room ${roomId} remained at 1 participant for 5 minutes. Purging room.`);
         soloRoomTimers.delete(roomId);
 
         // Broadcast expiration event to lone user
         io.to(roomId).emit('room:expired', {
           roomId,
           reason: 'solo_timeout',
-          message: `Room #${roomId} expired because no second participant joined within 1 minute.`,
+          message: `Room #${roomId} expired because no second participant joined within 5 minutes.`,
         });
 
         // Delete room from Redis & Memory
         await deleteRoom(roomId);
-      }, 60 * 1000); // 60 Seconds (1 Minute)
+      }, 5 * 60 * 1000); // 5 Minutes (300 Seconds)
 
       soloRoomTimers.set(roomId, timer);
     }
   } else {
     // If peerCount >= 2 or 0, cancel solo timer
     if (soloRoomTimers.has(roomId)) {
-      console.log(`[Solo Timer Cancelled] Room ${roomId} now has ${peerCount} participants. Clearing 60s timer.`);
+      console.log(`[Solo Timer Cancelled] Room ${roomId} now has ${peerCount} participants. Clearing 5-minute timer.`);
       clearTimeout(soloRoomTimers.get(roomId));
       soloRoomTimers.delete(roomId);
     }

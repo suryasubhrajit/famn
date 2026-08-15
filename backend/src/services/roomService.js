@@ -119,8 +119,15 @@ export const storeMessage = async (roomId, message) => {
   memoryRoomMessages.get(roomId).push(message);
 };
 
+const emptyRoomTimers = new Map();
+
 // Purge/Delete room immediately from Redis and Memory
 export const deleteRoom = async (roomId) => {
+  if (emptyRoomTimers.has(roomId)) {
+    clearTimeout(emptyRoomTimers.get(roomId));
+    emptyRoomTimers.delete(roomId);
+  }
+
   const redis = getRedisClient();
   if (redis) {
     try {
@@ -134,16 +141,37 @@ export const deleteRoom = async (roomId) => {
   memoryRoomMessages.delete(roomId);
 };
 
-// Handle room empty / user disconnect inactivity cleanup
+// Handle room empty / user disconnect inactivity cleanup with 5-minute grace period
 export const handleRoomParticipantChange = async (roomId, activeParticipantCount) => {
   const redis = getRedisClient();
 
   if (activeParticipantCount === 0) {
-    // Immediately delete room if all participants leave
-    await deleteRoom(roomId);
-    console.log(`[Room Auto-Destruct] Room ${roomId} is empty (0 peers). Purged immediately.`);
+    // Start 5-minute (300s) grace period before purging empty room
+    if (!emptyRoomTimers.has(roomId)) {
+      console.log(`[Room Grace Period] Room ${roomId} is empty (0 peers). Starting 5-minute cleanup timer.`);
+      if (redis) {
+        try {
+          await redis.expire(`room:${roomId}:messages`, 300);
+          await redis.expire(`room:${roomId}:meta`, 300);
+        } catch (err) {}
+      }
+
+      const timer = setTimeout(async () => {
+        console.log(`[Room Grace Expired] Room ${roomId} remained empty for 5 minutes. Purging.`);
+        emptyRoomTimers.delete(roomId);
+        await deleteRoom(roomId);
+      }, 5 * 60 * 1000); // 5 Minutes Grace Period
+
+      emptyRoomTimers.set(roomId, timer);
+    }
   } else {
-    // Users are active in room, refresh room TTL
+    // Users active in room, cancel empty room cleanup timer & restore 1-hour TTL
+    if (emptyRoomTimers.has(roomId)) {
+      console.log(`[Room Restored] Peer joined empty room ${roomId}. Cancelling 5-minute cleanup timer.`);
+      clearTimeout(emptyRoomTimers.get(roomId));
+      emptyRoomTimers.delete(roomId);
+    }
+
     if (redis) {
       try {
         await redis.expire(`room:${roomId}:messages`, 3600);
@@ -151,6 +179,35 @@ export const handleRoomParticipantChange = async (roomId, activeParticipantCount
       } catch (err) {}
     }
   }
+};
+
+// Extend room lifetime by custom duration (default +30 minutes)
+export const extendRoomTTL = async (roomId, extensionSeconds = 1800) => {
+  const redis = getRedisClient();
+
+  if (emptyRoomTimers.has(roomId)) {
+    clearTimeout(emptyRoomTimers.get(roomId));
+    emptyRoomTimers.delete(roomId);
+  }
+
+  if (redis) {
+    try {
+      await redis.expire(`room:${roomId}:messages`, extensionSeconds);
+      await redis.expire(`room:${roomId}:meta`, extensionSeconds);
+      console.log(`[Room Extended] Room ${roomId} TTL extended by ${extensionSeconds}s.`);
+      return { success: true, extensionSeconds };
+    } catch (err) {
+      console.error('[Room Extend Error]', err.message);
+    }
+  }
+
+  if (memoryRoomMeta.has(roomId)) {
+    const meta = memoryRoomMeta.get(roomId);
+    meta.extendedAt = new Date().toISOString();
+    return { success: true, extensionSeconds };
+  }
+
+  return { success: false, reason: 'room_not_found' };
 };
 
 export const getRoomMessages = async (roomId) => {
