@@ -433,7 +433,10 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
         <Box
           sx={{
             position: 'absolute',
-            inset: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: { xs: '75px', md: 0 },
             pointerEvents: 'none',
             userSelect: 'none',
             zIndex: 0,
@@ -442,7 +445,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
             gridTemplateRows: 'repeat(4, 1fr)',
             alignItems: 'center',
             justifyItems: 'center',
-            p: 2,
+            p: { xs: 0.5, sm: 2 },
             opacity: mode === 'dark' ? 0.035 : 0.05,
             filter: mode === 'dark' ? 'invert(1) brightness(1.8)' : 'grayscale(100%)',
           }}
@@ -452,7 +455,12 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
               key={i}
               src={`${BACKEND_URL}/public/images/boofer.png`}
               alt="Boofer Tile"
-              style={{ width: 130, maxWidth: '70%', height: 'auto', display: 'block' }}
+              style={{
+                width: isMobile ? 75 : 130,
+                maxWidth: isMobile ? '60%' : '70%',
+                height: 'auto',
+                display: 'block',
+              }}
             />
           ))}
         </Box>
