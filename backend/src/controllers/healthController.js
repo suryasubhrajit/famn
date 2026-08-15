@@ -1,7 +1,7 @@
 import path from 'path';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const { authenticator } = require('otplib');
+const otplib = require('otplib');
 import { getRedisClient } from '../config/redis.js';
 import { mongoPoolManager } from '../config/mongoMultiDb.js';
 import { getTelemetryKpis } from '../services/roomService.js';
@@ -35,13 +35,17 @@ export const verifyHealthTotp = (req, res) => {
   }
 
   try {
+    const cleanCode = String(code).replace(/\D/g, '').trim();
+    if (cleanCode.length !== 6) {
+      return res.status(400).json({ success: false, error: 'Please enter a valid 6-digit code' });
+    }
+
     // Configure 1-step (30s) window tolerance for phone/server clock drift
-    authenticator.options = { window: 1 };
-    const cleanCode = String(code).replace(/\s+/g, '').trim();
-    const isValid = authenticator.check(cleanCode, secret);
+    otplib.authenticator.options = { window: 1 };
+    const isValid = otplib.authenticator.check(cleanCode, secret);
 
     if (!isValid) {
-      return res.status(401).json({ success: false, error: 'Invalid 6-digit Google Authenticator code. Check app clock.' });
+      return res.status(401).json({ success: false, error: 'Invalid 6-digit Google Authenticator code.' });
     }
 
     return res.json({
@@ -50,17 +54,9 @@ export const verifyHealthTotp = (req, res) => {
       authToken: 'famn_health_authenticated_session',
     });
   } catch (err) {
+    console.error('[TOTP Verification Error]', err);
     return res.status(401).json({ success: false, error: 'Failed to verify TOTP code: ' + err.message });
   }
-};
-
-export const getTotpSetupInfo = (req, res) => {
-  const secret = process.env.TOTP_SECRET || 'JBSWY3DPEHPK3PXP';
-  const otpauth = authenticator.keyuri('admin@famn', 'FAMN Health Telemetry', secret);
-  return res.json({
-    secret,
-    otpauth,
-  });
 };
 
 export const getHealthStatus = async (req, res) => {

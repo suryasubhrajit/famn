@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getHealthStatus, verifyHealthPassword, verifyHealthTotp, getTotpSetupInfo } from '../controllers/healthController.js';
+import { getHealthStatus, verifyHealthPassword, verifyHealthTotp } from '../controllers/healthController.js';
 
 const router = Router();
 
@@ -7,6 +7,5 @@ const router = Router();
 router.get('/health', getHealthStatus);
 router.post('/health/verify-pass', verifyHealthPassword);
 router.post('/health/verify-totp', verifyHealthTotp);
-router.get('/health/totp-setup', getTotpSetupInfo);
 
 export default router;

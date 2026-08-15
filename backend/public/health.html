@@ -40,15 +40,6 @@
           </div>
           <button type="submit" class="auth-btn-submit">Verify Google 2FA Code</button>
         </form>
-
-        <button type="button" class="setup-toggle-btn" onclick="toggleQrSetup()">Setup Google Authenticator App</button>
-
-        <div id="qr-box" class="qr-box">
-          <div style="font-size: 0.78rem; color: var(--text-muted);">Scan QR Code with Google Authenticator:</div>
-          <img id="qr-img" class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=otpauth%3A%2F%2Ftotp%2FFAMN%2520Health%3Aadmin%40famn%3Fsecret%3DJBSWY3DPEHPK3PXP%26issuer%3DFAMN" alt="Google Authenticator QR Code" />
-          <div style="font-size: 0.75rem; color: var(--text-muted);">Or enter secret key manually:</div>
-          <div class="totp-key">JBSWY3DPEHPK3PXP</div>
-        </div>
       </div>
 
       <!-- Tab 2: Device Biometrics -->
