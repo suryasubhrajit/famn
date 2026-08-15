@@ -387,9 +387,15 @@
 
     const fetchTelemetry = async () => {
       try {
-        const res = await fetch('/api/health', {
-          headers: { 'Accept': 'application/json' }
-        });
+        let res;
+        try {
+          res = await fetch('/api/health', { headers: { 'Accept': 'application/json' } });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        } catch (e) {
+          // Fallback to Render backend URL if running on Vercel or different domain
+          res = await fetch('https://famn-i1v2.onrender.com/api/health', { headers: { 'Accept': 'application/json' } });
+        }
+        
         const data = await res.json();
 
         // MongoDB
@@ -407,7 +413,7 @@
         }
 
         document.getElementById('mongo-pools').textContent = 
-          `${mongo?.healthyPools || 0} Healthy / ${mongo?.totalPools || 0} Total`;
+          mongo?.healthyPools !== undefined ? `${mongo.healthyPools} Healthy / ${mongo.totalPools || 0} Total` : '0 Healthy / 0 Total';
 
         // Redis
         const redis = data.services?.redis;

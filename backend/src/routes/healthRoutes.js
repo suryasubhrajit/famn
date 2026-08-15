@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { getHealthStatus, renderHealthDashboard } from '../controllers/healthController.js';
+import { getHealthStatus } from '../controllers/healthController.js';
 
 const router = Router();
 
-router.get('/health', renderHealthDashboard);
-router.get('/status', renderHealthDashboard);
-router.get('/api/health', getHealthStatus);
+// Mounted at /api in index.js -> responds to GET /api/health
+router.get('/health', getHealthStatus);
 
 export default router;
