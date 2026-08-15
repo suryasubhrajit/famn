@@ -35,9 +35,13 @@ export const verifyHealthTotp = (req, res) => {
   }
 
   try {
-    const isValid = authenticator.check(String(code).trim(), secret);
+    // Configure 1-step (30s) window tolerance for phone/server clock drift
+    authenticator.options = { window: 1 };
+    const cleanCode = String(code).replace(/\s+/g, '').trim();
+    const isValid = authenticator.check(cleanCode, secret);
+
     if (!isValid) {
-      return res.status(401).json({ success: false, error: 'Invalid 6-digit Google Authenticator code' });
+      return res.status(401).json({ success: false, error: 'Invalid 6-digit Google Authenticator code. Check app clock.' });
     }
 
     return res.json({

@@ -329,11 +329,16 @@ header {
   transition: width 5s linear;
 }
 
-/* Security Lock Screen Overlay */
+/* Complete privacy hiding when locked */
+body.locked .container {
+  display: none !important;
+}
+
+/* Security Vault Overlay */
 .auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(7, 10, 18, 0.95);
+  background: rgba(7, 10, 18, 0.96);
   backdrop-filter: blur(24px);
   z-index: 9999;
   display: flex;
@@ -345,40 +350,162 @@ header {
 .auth-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 20px;
-  padding: 2.5rem;
+  border-radius: 24px;
+  padding: 2.25rem;
   width: 100%;
   max-width: 440px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
   text-align: center;
-  animation: fadeIn 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.auth-icon {
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+}
+
+.auth-icon-shield {
+  width: 60px;
+  height: 60px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  margin: 0 auto 1.5rem auto;
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+  font-size: 1.8rem;
+  margin: 0 auto 1.25rem auto;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
 }
 
 .auth-title {
   font-size: 1.35rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
   color: #ffffff;
 }
 
 .auth-desc {
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   color: var(--text-muted);
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
   line-height: 1.4;
+}
+
+/* Vault Security Tabs */
+.vault-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  gap: 4px;
+}
+
+.vault-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.55rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.vault-tab.active {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+/* Segmented 6-digit PIN Input */
+.pin-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+}
+
+.pin-digit {
+  width: 48px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pin-digit:focus {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+/* QR Code & Setup Helper Accordion */
+.setup-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--accent-blue);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  text-decoration: underline;
+}
+
+.qr-box {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+  display: none;
+  text-align: center;
+}
+
+.qr-img {
+  width: 140px;
+  height: 140px;
+  border-radius: 10px;
+  margin: 0.5rem auto;
+  display: block;
+}
+
+.totp-key {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #60a5fa;
+  letter-spacing: 0.1em;
+  user-select: all;
+  margin-top: 0.4rem;
 }
 
 .auth-btn-bio {
@@ -387,7 +514,7 @@ header {
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
-  padding: 0.85rem 1.25rem;
+  padding: 0.9rem 1.25rem;
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -395,7 +522,6 @@ header {
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  margin-bottom: 1.25rem;
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -403,24 +529,6 @@ header {
 .auth-btn-bio:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1.25rem 0;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.divider::before, .divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .auth-input-group {
@@ -490,29 +598,3 @@ header {
   color: var(--status-red);
   border-color: rgba(239, 68, 68, 0.3);
 }
-
-/* Complete privacy hiding when locked */
-body.locked .container {
-  display: none !important;
-}
-
-.totp-box {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px dashed rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  padding: 0.85rem;
-  margin-bottom: 1rem;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-.totp-key {
-  font-family: monospace;
-  font-weight: 700;
-  font-size: 1rem;
-  color: #60a5fa;
-  letter-spacing: 0.1em;
-  margin-top: 0.3rem;
-  user-select: all;
-}
-
