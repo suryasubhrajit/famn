@@ -7,6 +7,21 @@ export const renderHealthDashboard = (req, res) => {
   res.sendFile(dashboardPath);
 };
 
+export const verifyHealthPassword = (req, res) => {
+  const { password } = req.body || {};
+  const expectedPass = process.env.HEALTH_DASHBOARD_PASSWORD || 'famn_admin_2026';
+
+  if (!password || password !== expectedPass) {
+    return res.status(401).json({ success: false, error: 'Invalid security password' });
+  }
+
+  return res.json({
+    success: true,
+    message: 'Authenticated successfully',
+    authToken: 'famn_health_authenticated_session',
+  });
+};
+
 export const getHealthStatus = (req, res) => {
   const redis = getRedisClient();
   const mongoHealthyCount = mongoPoolManager.getHealthyConnections().length;
