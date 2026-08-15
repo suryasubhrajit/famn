@@ -462,7 +462,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
           alignItems: 'center',
           justifyContent: 'flex-start',
           px: { xs: 2, sm: 3, md: 6 },
-          pt: { xs: 4, md: 6 },
+          pt: { xs: 6, sm: 7, md: 7 },
           pb: { xs: 5, md: 7 },
           background: mode === 'dark'
             ? 'radial-gradient(ellipse 80% 70% at 50% -10%, rgba(99,102,241,0.3) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 50%, rgba(139,92,246,0.15) 0%, transparent 60%), #0B0F19'
@@ -864,30 +864,31 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
         component="footer"
         sx={{
           borderTop: `1px solid ${theme.palette.divider}`,
-          px: { xs: 2, sm: 4, md: 6 },
+          px: { xs: 2.5, sm: 4, md: 6 },
           py: { xs: 4, md: 5 },
           display: 'flex',
           flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'flex-start', sm: 'center' },
+          alignItems: { xs: 'center', sm: 'flex-start' },
           justifyContent: 'space-between',
-          gap: 3,
+          textAlign: { xs: 'center', sm: 'left' },
+          gap: 3.5,
           bgcolor: mode === 'dark' ? 'rgba(11,15,25,0.9)' : 'rgba(243,244,246,0.9)',
           maxWidth: '100%',
         }}
       >
         {/* Left: Brand */}
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'center', sm: 'flex-start' } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' }, gap: 1, mb: 1 }}>
             <ShieldCheck size={18} color={theme.palette.primary.main} />
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.primary' }}>
               Shaadow Platforms
             </Typography>
           </Box>
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem', display: 'block', mb: 1.5, maxWidth: 300 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.78rem', display: 'block', mb: 1.8, maxWidth: 340, textAlign: { xs: 'center', sm: 'left' } }}>
             Engineering privacy-first, ephemeral communication tools and WebRTC peer-to-peer protocols.
           </Typography>
-          <Box sx={{ display: 'flex', gap: 0.8, flexWrap: 'wrap' }}>
-            <Chip label="FAMN v2.5" size="small" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'primary.main', color: '#fff' }} />
+          <Box sx={{ display: 'flex', gap: 0.8, flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+            <Chip label="FAMN v2.5" size="small" sx={{ height: 22, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'primary.main', color: '#fff' }} />
             <Chip
               label="Boofer App"
               size="small"
@@ -895,18 +896,18 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
               href="https://play.google.com/store/apps/details?id=com.shaadow.boofer.android"
               target="_blank"
               clickable
-              sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(0,163,255,0.15)', color: '#00A3FF' }}
+              sx={{ height: 22, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'rgba(0,163,255,0.15)', color: '#00A3FF' }}
             />
-            <Chip label="PulseP2P Core" size="small" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700, bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }} />
+            <Chip label="PulseP2P Core" size="small" sx={{ height: 22, fontSize: '0.68rem', fontWeight: 700, bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }} />
           </Box>
         </Box>
 
         {/* Right: Legal Links */}
-        <Box>
-          <Typography variant="caption" sx={{ fontWeight: 800, letterSpacing: '0.09em', color: 'text.secondary', display: 'block', mb: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'center', sm: 'flex-start' } }}>
+          <Typography variant="caption" sx={{ fontWeight: 800, letterSpacing: '0.09em', color: 'text.secondary', display: 'block', mb: 1, textAlign: { xs: 'center', sm: 'left' } }}>
             LEGAL & SECURITY
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.6 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.6, alignItems: { xs: 'center', sm: 'flex-start' } }}>
             {[
               { label: 'Privacy Policy & Zero-Logs', key: 'privacy', icon: <Lock size={14} /> },
               { label: 'Terms of Service', key: 'terms', icon: <FileText size={14} /> },
@@ -918,13 +919,13 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
                 onClick={() => setActiveLegalPage(key)}
                 startIcon={icon}
                 sx={{
-                  justifyContent: 'flex-start',
-                  px: 1.5,
+                  justifyContent: { xs: 'center', sm: 'flex-start' },
+                  px: 1.8,
                   py: 0.8,
                   borderRadius: '10px',
                   textTransform: 'none',
                   color: 'text.secondary',
-                  fontSize: '0.8rem',
+                  fontSize: '0.82rem',
                   fontWeight: 600,
                   minWidth: 0,
                   transition: 'all 0.2s ease',
@@ -949,17 +950,18 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
           py: 3,
           pb: { xs: 'calc(40px + env(safe-area-inset-bottom, 0px))', sm: 3 },
           display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
           alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
+          justifyContent: { xs: 'center', sm: 'space-between' },
+          textAlign: 'center',
           gap: 1.5,
           bgcolor: mode === 'dark' ? 'rgba(11,15,25,0.9)' : 'rgba(243,244,246,0.9)',
         }}
       >
-        <Typography variant="caption" sx={{ fontSize: '0.78rem', color: 'text.secondary', fontWeight: 600 }}>
+        <Typography variant="caption" sx={{ fontSize: '0.78rem', color: 'text.secondary', fontWeight: 600, textAlign: 'center' }}>
           © 2026 Shaadow Platforms. All rights reserved.
         </Typography>
-        <Typography variant="caption" sx={{ fontSize: '0.78rem', color: 'text.secondary', fontWeight: 700 }}>
+        <Typography variant="caption" sx={{ fontSize: '0.78rem', color: 'text.secondary', fontWeight: 700, textAlign: 'center' }}>
           🔒 Volatile RAM Ephemeral Protocol
         </Typography>
       </Box>
