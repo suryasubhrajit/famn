@@ -401,9 +401,9 @@ const LegalPageView = ({ pageKey, onBack, onSelectPage, mode }) => {
         </Paper>
 
         {/* Footer info */}
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
-            © 2026 Shaadow Platforms. All rights reserved. • Ephemeral Memory Protocol
+        <Box sx={{ textAlign: 'center', mt: 4, mb: { xs: 12, sm: 4 } }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.78rem', fontWeight: 600 }}>
+            © 2026 Shaadow Platforms. All rights reserved. • 🔒 Ephemeral Memory Protocol
           </Typography>
         </Box>
       </Box>
@@ -945,24 +945,27 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
       <Box
         sx={{
           borderTop: `1px solid ${theme.palette.divider}`,
-          px: { xs: 2, md: 6 },
-          py: 2,
-          pb: { xs: 'calc(64px + env(safe-area-inset-bottom, 0px))', sm: 3 },
+          px: { xs: 2.5, md: 6 },
+          py: 3,
+          pb: { xs: 'calc(40px + env(safe-area-inset-bottom, 0px))', sm: 3 },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: 1,
+          gap: 1.5,
           bgcolor: mode === 'dark' ? 'rgba(11,15,25,0.9)' : 'rgba(243,244,246,0.9)',
         }}
       >
-        <Typography variant="caption" sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+        <Typography variant="caption" sx={{ fontSize: '0.78rem', color: 'text.secondary', fontWeight: 600 }}>
           © 2026 Shaadow Platforms. All rights reserved.
         </Typography>
-        <Typography variant="caption" sx={{ fontSize: '0.72rem', color: 'text.secondary', fontWeight: 600 }}>
+        <Typography variant="caption" sx={{ fontSize: '0.78rem', color: 'text.secondary', fontWeight: 700 }}>
           🔒 Volatile RAM Ephemeral Protocol
         </Typography>
       </Box>
+
+      {/* Dedicated Extra Bottom Spacer Box for Mobile Browser Navigation Bars */}
+      <Box sx={{ height: { xs: 90, sm: 0 }, width: '100%', flexShrink: 0, bgcolor: mode === 'dark' ? 'rgba(11,15,25,0.9)' : 'rgba(243,244,246,0.9)' }} />
     </Box>
   );
 };
