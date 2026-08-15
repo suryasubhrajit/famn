@@ -14,9 +14,20 @@
   <!-- Security Gate Overlay -->
   <div id="auth-overlay" class="auth-overlay">
     <div class="auth-card">
-      <div class="auth-icon">🔒</div>
-      <div class="auth-title">Telemetry Dashboard Gate</div>
-      <div class="auth-desc">Authentication required. Unlock using Device Biometrics (Touch ID / Face ID / Windows Hello) or security password.</div>
+      <div class="auth-icon">🔑</div>
+      <div class="auth-title">Telemetry Security Gate</div>
+      <div class="auth-desc">Authentication required. Unlock with Google Authenticator TOTP, Device Biometrics (Touch ID / Face ID / Windows Hello), or password.</div>
+
+      <!-- Google Authenticator 2FA Form -->
+      <form onsubmit="handleTotpSubmit(event)" class="auth-input-group" style="margin-bottom: 1rem;">
+        <input type="text" id="auth-totp" class="auth-input" placeholder="Enter 6-digit Google 2FA code..." maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" required />
+        <button type="submit" class="auth-btn-submit">Verify Google 2FA Code</button>
+      </form>
+
+      <div class="totp-box">
+        <div>Google Authenticator Setup Secret:</div>
+        <div id="totp-secret-val" class="totp-key">JBSWY3DPEHPK3PXP</div>
+      </div>
 
       <button id="btn-bio-unlock" class="auth-btn-bio" onclick="triggerBiometricUnlock()">
         <span>👆 Unlock with Device Biometrics</span>
@@ -26,13 +37,14 @@
 
       <form onsubmit="handlePasswordSubmit(event)" class="auth-input-group">
         <input type="password" id="auth-password" class="auth-input" placeholder="Enter HEALTH_DASHBOARD_PASSWORD..." required />
-        <button type="submit" class="auth-btn-submit">Authenticate</button>
+        <button type="submit" class="auth-btn-submit" style="background: rgba(255,255,255,0.08);">Authenticate with Password</button>
       </form>
 
-      <div id="auth-error" class="auth-error">Invalid security password. Please try again.</div>
+      <div id="auth-error" class="auth-error">Authentication failed. Please check your credentials.</div>
     </div>
   </div>
 
+  <!-- Content Container (Completely hidden with display:none when locked) -->
   <div class="container">
     <header>
       <div class="brand">
@@ -224,6 +236,49 @@
       sessionStorage.removeItem(AUTH_KEY);
       document.body.classList.add('locked');
       document.getElementById('auth-overlay').style.display = 'flex';
+      if (telemetryInterval) {
+        clearInterval(telemetryInterval);
+        telemetryInterval = null;
+      }
+    };
+
+    // Google Authenticator TOTP Form Submission
+    const handleTotpSubmit = async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('auth-totp').value.trim();
+      const errEl = document.getElementById('auth-error');
+      errEl.style.display = 'none';
+
+      try {
+        let res;
+        try {
+          res = await fetch('/api/health/verify-totp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code }),
+          });
+        } catch (e) {
+          res = await fetch('https://famn-i1v2.onrender.com/api/health/verify-totp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code }),
+          });
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          sessionStorage.setItem(AUTH_KEY, 'true');
+          document.body.classList.remove('locked');
+          document.getElementById('auth-overlay').style.display = 'none';
+          initTelemetry();
+        } else {
+          errEl.textContent = data.error || 'Invalid 6-digit Google Authenticator code.';
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = 'Verification error. Please check backend connection.';
+        errEl.style.display = 'block';
+      }
     };
 
     // Device Biometric Unlock (WebAuthn API: Touch ID, Face ID, Windows Hello, Fingerprint)
@@ -248,17 +303,22 @@
             timeout: 60000,
             userVerification: 'required',
           }
-        }).catch(() => null);
+        });
 
-        // Biometric prompt verified or platform authentication completed
-        sessionStorage.setItem(AUTH_KEY, 'true');
-        document.body.classList.remove('locked');
-        document.getElementById('auth-overlay').style.display = 'none';
-        initTelemetry();
+        if (credential) {
+          sessionStorage.setItem(AUTH_KEY, 'true');
+          document.body.classList.remove('locked');
+          document.getElementById('auth-overlay').style.display = 'none';
+          initTelemetry();
+        } else {
+          throw new Error('Biometric verification failed');
+        }
       } catch (err) {
         console.warn('Biometric authentication cancelled or unhandled:', err);
-        errEl.textContent = 'Biometric verification cancelled or unavailable. Use password below.';
+        errEl.textContent = 'Biometric verification failed or cancelled. Use Google TOTP code or password.';
         errEl.style.display = 'block';
+        // Ensure content stays strictly locked
+        document.body.classList.add('locked');
       }
     };
 
@@ -309,6 +369,8 @@
     };
 
     const fetchTelemetry = async () => {
+      if (document.body.classList.contains('locked')) return;
+
       try {
         let res;
         try {

@@ -491,9 +491,28 @@ header {
   border-color: rgba(239, 68, 68, 0.3);
 }
 
-/* Blur content when locked */
+/* Complete privacy hiding when locked */
 body.locked .container {
-  filter: blur(10px);
-  pointer-events: none;
-  user-select: none;
+  display: none !important;
 }
+
+.totp-box {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 0.85rem;
+  margin-bottom: 1rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.totp-key {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #60a5fa;
+  letter-spacing: 0.1em;
+  margin-top: 0.3rem;
+  user-select: all;
+}
+

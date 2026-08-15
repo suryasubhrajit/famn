@@ -19,6 +19,7 @@
     "ioredis": "^6.0.0",
     "mongoose": "^9.9.2",
     "multer": "^2.2.0",
+    "otplib": "^13.4.1",
     "socket.io": "^4.8.3"
   }
 }

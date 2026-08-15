@@ -1,4 +1,7 @@
 import path from 'path';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { authenticator } = require('otplib');
 import { getRedisClient } from '../config/redis.js';
 import { mongoPoolManager } from '../config/mongoMultiDb.js';
 import { getTelemetryKpis } from '../services/roomService.js';
@@ -20,6 +23,39 @@ export const verifyHealthPassword = (req, res) => {
     success: true,
     message: 'Authenticated successfully',
     authToken: 'famn_health_authenticated_session',
+  });
+};
+
+export const verifyHealthTotp = (req, res) => {
+  const { code } = req.body || {};
+  const secret = process.env.TOTP_SECRET || 'JBSWY3DPEHPK3PXP';
+
+  if (!code) {
+    return res.status(400).json({ success: false, error: 'Please enter a 6-digit TOTP code' });
+  }
+
+  try {
+    const isValid = authenticator.check(String(code).trim(), secret);
+    if (!isValid) {
+      return res.status(401).json({ success: false, error: 'Invalid 6-digit Google Authenticator code' });
+    }
+
+    return res.json({
+      success: true,
+      message: 'TOTP 2FA verified successfully',
+      authToken: 'famn_health_authenticated_session',
+    });
+  } catch (err) {
+    return res.status(401).json({ success: false, error: 'Failed to verify TOTP code: ' + err.message });
+  }
+};
+
+export const getTotpSetupInfo = (req, res) => {
+  const secret = process.env.TOTP_SECRET || 'JBSWY3DPEHPK3PXP';
+  const otpauth = authenticator.keyuri('admin@famn', 'FAMN Health Telemetry', secret);
+  return res.json({
+    secret,
+    otpauth,
   });
 };
 
