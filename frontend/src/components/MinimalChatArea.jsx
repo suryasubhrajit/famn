@@ -107,23 +107,32 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
   const [emojiPickerAnchor, setEmojiPickerAnchor] = useState(null);
   const [customReactionMsgId, setCustomReactionMsgId] = useState(null);
   const [uploadingFile, setUploadingFile] = useState(false);
-  const [soloCountdown, setSoloCountdown] = useState(60);
+  const [soloCountdown, setSoloCountdown] = useState(300);
 
   const fileInputRef = useRef(null);
   const textInputRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const typingTimerRef = useRef(null);
 
-  // ── Solo countdown timer (60s) — auto fallback to landing if no 2nd user joins ──
+  const formatCountdownText = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins > 0) {
+      return `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+    }
+    return `${secs}s`;
+  };
+
+  // ── Solo countdown timer (300s / 5 minutes) — auto fallback to landing if no 2nd user joins ──
   const canChat = peers.length >= 2;
   useEffect(() => {
     if (canChat) {
       // Reset timer whenever a 2nd person joins
-      setSoloCountdown(60);
+      setSoloCountdown(300);
       return;
     }
-    // Start countdown when alone in room
-    setSoloCountdown(60);
+    // Start 5-minute (300s) countdown when alone in room
+    setSoloCountdown(300);
     const interval = setInterval(() => {
       setSoloCountdown((prev) => {
         if (prev <= 1) {
@@ -570,23 +579,23 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
                   <circle
                     cx="24" cy="24" r="20"
                     fill="none"
-                    stroke={soloCountdown <= 10 ? '#EF4444' : '#F59E0B'}
+                    stroke={soloCountdown <= 15 ? '#EF4444' : '#F59E0B'}
                     strokeWidth="4"
                     strokeLinecap="round"
                     strokeDasharray={`${2 * Math.PI * 20}`}
-                    strokeDashoffset={`${2 * Math.PI * 20 * (1 - soloCountdown / 60)}`}
+                    strokeDashoffset={`${2 * Math.PI * 20 * (1 - soloCountdown / 300)}`}
                     style={{ transition: 'stroke-dashoffset 0.9s linear, stroke 0.5s ease' }}
                   />
                 </svg>
                 <Typography
                   sx={{
                     position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 800, fontSize: '0.85rem',
-                    color: soloCountdown <= 10 ? '#EF4444' : '#F59E0B',
+                    fontWeight: 800, fontSize: '0.75rem',
+                    color: soloCountdown <= 15 ? '#EF4444' : '#F59E0B',
                     transition: 'color 0.5s ease',
                   }}
                 >
-                  {soloCountdown}s
+                  {formatCountdownText(soloCountdown)}
                 </Typography>
               </Box>
               <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem', textAlign: 'left' }}>
