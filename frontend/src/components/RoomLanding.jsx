@@ -68,7 +68,9 @@ const LegalPageView = ({ pageKey, onBack, onSelectPage, mode }) => {
     <Box
       sx={{
         width: '100%',
-        minHeight: '100%',
+        height: '100%',
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
         bgcolor: theme.palette.background.default,
         display: 'flex',
         flexDirection: 'column',
@@ -442,7 +444,9 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
     <Box
       sx={{
         width: '100%',
-        minHeight: '100%',
+        height: '100%',
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
         display: 'flex',
         flexDirection: 'column',
         bgcolor: theme.palette.background.default,
