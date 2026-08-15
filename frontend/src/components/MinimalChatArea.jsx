@@ -255,7 +255,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
   return (
     <Box
       sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%',
-            bgcolor: theme.palette.background.default, overflow: 'auto', minHeight: 0 }}
+            bgcolor: theme.palette.background.default, overflow: 'hidden' }}
     >
       {/* ── Chat Header ── */}
       <Paper elevation={0} sx={{
@@ -428,6 +428,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
           height: '100%',
           overflowY: 'auto',
           p: { xs: 1.5, sm: 3 },
+          pb: { xs: '80px', sm: 3 },
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
@@ -824,20 +825,24 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
         </Paper>
       )}
 
-      {/* ── Input Bar (fixed at bottom of flex column) ── */}
+      {/* ── Input Bar: position:fixed on mobile to escape overflow:hidden ancestors ── */}
       <Box sx={{
-        flexShrink: 0,
-        p: { xs: '8px 10px', sm: '10px 16px', md: '10px 16px' },
-        pb: { xs: 'calc(10px + env(safe-area-inset-bottom, 0px))', sm: '10px' },
-        mx: 0,
-        bgcolor: mode === 'dark' ? 'rgba(18, 24, 38, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        position: { xs: 'fixed', md: 'relative' },
+        bottom: { xs: 0, md: 'auto' },
+        left: { xs: 0, md: 'auto' },
+        right: { xs: 0, md: 'auto' },
+        flexShrink: { md: 0 },
+        p: { xs: '10px 12px', sm: '10px 16px', md: '10px 16px' },
+        pb: { xs: 'calc(12px + env(safe-area-inset-bottom, 0px))', sm: '10px' },
+        bgcolor: mode === 'dark' ? 'rgba(15, 20, 35, 0.97)' : 'rgba(255, 255, 255, 0.97)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
         borderTop: `1px solid ${theme.palette.divider}`,
         boxShadow: mode === 'dark'
-          ? '0 -4px 20px rgba(0, 0, 0, 0.3)'
-          : '0 -4px 20px rgba(99, 102, 241, 0.08)',
-        zIndex: 10,
+          ? '0 -4px 20px rgba(0, 0, 0, 0.4)'
+          : '0 -4px 20px rgba(99, 102, 241, 0.1)',
+        zIndex: 1200,
+        width: { xs: '100%', md: 'auto' },
       }}>
         {typingUser && (
           <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic',
