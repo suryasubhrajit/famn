@@ -106,38 +106,40 @@ export const RoomSidebar = ({ onCloseMobileDrawer }) => {
           </Typography>
 
           {/* Quick Actions */}
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              fullWidth
-              size="small"
-              variant="contained"
-              onClick={copyInviteLink}
-              startIcon={copySuccess ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
-              sx={{
-                borderRadius: '10px',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                textTransform: 'none',
-                background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
-              }}
-            >
-              {copySuccess ? 'Copied!' : 'Copy Link'}
-            </Button>
-
-            <Tooltip title="Show Room QR Code">
+          {peers.length < 2 && (
+            <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
+                fullWidth
                 size="small"
-                variant="outlined"
-                onClick={() => {
-                  setActiveModal('qrCode');
-                  if (onCloseMobileDrawer) onCloseMobileDrawer();
+                variant="contained"
+                onClick={copyInviteLink}
+                startIcon={copySuccess ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
+                sx={{
+                  borderRadius: '10px',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
                 }}
-                sx={{ borderRadius: '10px', minWidth: 40, p: 0 }}
               >
-                <QrCode size={16} />
+                {copySuccess ? 'Copied!' : 'Copy Link'}
               </Button>
-            </Tooltip>
-          </Box>
+
+              <Tooltip title="Show Room QR Code">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => {
+                    setActiveModal('qrCode');
+                    if (onCloseMobileDrawer) onCloseMobileDrawer();
+                  }}
+                  sx={{ borderRadius: '10px', minWidth: 40, p: 0 }}
+                >
+                  <QrCode size={16} />
+                </Button>
+              </Tooltip>
+            </Box>
+          )}
         </Paper>
       ) : (
         <Paper

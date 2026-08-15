@@ -18,9 +18,9 @@ import { useChat } from '../../context/ChatContext';
 
 export const QRCodeModal = () => {
   const theme = useTheme();
-  const { activeModal, setActiveModal, roomId, copyInviteLink, copySuccess, mode } = useChat();
+  const { activeModal, setActiveModal, roomId, copyInviteLink, copySuccess, mode, peers } = useChat();
 
-  const open = activeModal === 'qrCode';
+  const open = activeModal === 'qrCode' && (peers?.length || 0) < 2;
   // Clean URL Path: e.g. http://localhost:5173/tsy-cusn-bti or https://famn.vercel.app/tsy-cusn-bti
   const roomUrl = `${window.location.origin}/${roomId || ''}`;
 

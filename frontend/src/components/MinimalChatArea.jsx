@@ -394,19 +394,21 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
             {!isMobile && 'Get Boofer'}
           </Button>
 
-          <Chip
-            icon={<UserPlus size={13} color="#6366F1" />}
-            label={copySuccess ? 'Copied!' : 'Invite'}
-            size="small"
-            onClick={copyInviteLink}
-            sx={{
-              fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', height: 28, px: 0.3,
-              bgcolor: 'rgba(99,102,241,0.1)', color: 'primary.main',
-              border: '1px solid rgba(99,102,241,0.3)',
-              transition: 'all 0.25s ease',
-              '&:hover': { transform: 'scale(1.04)', bgcolor: 'rgba(99,102,241,0.18)' },
-            }}
-          />
+          {peers.length < 2 && (
+            <Chip
+              icon={<UserPlus size={13} color="#6366F1" />}
+              label={copySuccess ? 'Copied!' : 'Invite'}
+              size="small"
+              onClick={copyInviteLink}
+              sx={{
+                fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', height: 28, px: 0.3,
+                bgcolor: 'rgba(99,102,241,0.1)', color: 'primary.main',
+                border: '1px solid rgba(99,102,241,0.3)',
+                transition: 'all 0.25s ease',
+                '&:hover': { transform: 'scale(1.04)', bgcolor: 'rgba(99,102,241,0.18)' },
+              }}
+            />
+          )}
         </Box>
       </Paper>
 

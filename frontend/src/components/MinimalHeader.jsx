@@ -119,7 +119,7 @@ export const MinimalHeader = () => {
             </Typography>
           </Box>
 
-          {roomId && (
+          {roomId && peers.length < 2 && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Chip
                 label={isMobile ? roomId.replace('room-', '') : roomId}
