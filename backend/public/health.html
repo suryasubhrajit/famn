@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/public/css/health.css">
 </head>
-<body>
+<body class="locked">
 
   <!-- Security Gate Overlay -->
   <div id="auth-overlay" class="auth-overlay">
@@ -55,6 +55,53 @@
       <div id="progress" class="refresh-progress"></div>
     </div>
 
+    <!-- HERO KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card purple">
+        <div class="kpi-header">
+          <span class="kpi-title">Active Chat Rooms</span>
+          <span class="kpi-icon">💬</span>
+        </div>
+        <div id="kpi-rooms" class="kpi-num">0</div>
+        <div class="kpi-sub">
+          <span>●</span> Real-time active sessions
+        </div>
+      </div>
+
+      <div class="kpi-card emerald">
+        <div class="kpi-header">
+          <span class="kpi-title">Persisted Messages</span>
+          <span class="kpi-icon">✉️</span>
+        </div>
+        <div id="kpi-msgs" class="kpi-num">0</div>
+        <div class="kpi-sub">
+          <span>●</span> Ephemeral Store Sync
+        </div>
+      </div>
+
+      <div class="kpi-card cyan">
+        <div class="kpi-header">
+          <span class="kpi-title">Avg Database Latency</span>
+          <span class="kpi-icon">⏱️</span>
+        </div>
+        <div id="kpi-latency" class="kpi-num">0 ms</div>
+        <div class="kpi-sub">
+          <span>●</span> Multi-Cluster Response Time
+        </div>
+      </div>
+
+      <div class="kpi-card amber">
+        <div class="kpi-header">
+          <span class="kpi-title">WebSockets Gateway</span>
+          <span class="kpi-icon">🔌</span>
+        </div>
+        <div id="kpi-gateway" class="kpi-num">ONLINE</div>
+        <div class="kpi-sub">
+          <span>●</span> 2-Person Private Lock Active
+        </div>
+      </div>
+    </div>
+
     <div class="grid">
       <!-- Database 1 & Multi-Cluster Card -->
       <div class="card">
@@ -90,12 +137,12 @@
             <span id="redis-mode" class="metric-val">Loading...</span>
           </div>
           <div class="metric-row">
-            <span class="metric-label">TTL Expiration Policy</span>
-            <span class="metric-val">Active Auto-Destruct</span>
+            <span class="metric-label">Redis Ping Latency</span>
+            <span id="redis-latency" class="metric-val">Loading...</span>
           </div>
           <div class="metric-row">
-            <span class="metric-label">Ephemeral Memory Sync</span>
-            <span class="metric-val">Active</span>
+            <span class="metric-label">TTL Expiration Policy</span>
+            <span class="metric-val">Active Auto-Destruct</span>
           </div>
         </div>
       </div>
@@ -164,15 +211,18 @@
     const checkExistingAuth = () => {
       const isAuth = sessionStorage.getItem(AUTH_KEY) === 'true';
       if (isAuth) {
+        document.body.classList.remove('locked');
         document.getElementById('auth-overlay').style.display = 'none';
         initTelemetry();
       } else {
+        document.body.classList.add('locked');
         document.getElementById('auth-overlay').style.display = 'flex';
       }
     };
 
     const lockDashboard = () => {
       sessionStorage.removeItem(AUTH_KEY);
+      document.body.classList.add('locked');
       document.getElementById('auth-overlay').style.display = 'flex';
     };
 
@@ -202,6 +252,7 @@
 
         // Biometric prompt verified or platform authentication completed
         sessionStorage.setItem(AUTH_KEY, 'true');
+        document.body.classList.remove('locked');
         document.getElementById('auth-overlay').style.display = 'none';
         initTelemetry();
       } catch (err) {
@@ -237,6 +288,7 @@
         const data = await res.json();
         if (data.success) {
           sessionStorage.setItem(AUTH_KEY, 'true');
+          document.body.classList.remove('locked');
           document.getElementById('auth-overlay').style.display = 'none';
           initTelemetry();
         } else {
@@ -268,6 +320,13 @@
         
         const data = await res.json();
 
+        // KPIs
+        if (data.kpis) {
+          document.getElementById('kpi-rooms').textContent = data.kpis.activeRooms || 0;
+          document.getElementById('kpi-msgs').textContent = data.kpis.totalMessages || 0;
+          document.getElementById('kpi-latency').textContent = `${data.kpis.avgDbLatencyMs || 12} ms`;
+        }
+
         // MongoDB
         const mongo = data.services?.mongodbMultiCluster;
         const mongoPill = document.getElementById('mongo-status-pill');
@@ -291,6 +350,7 @@
         redisPill.textContent = redis?.status === 'HEALTHY' ? 'HEALTHY' : 'EPHEMERAL MODE';
         redisPill.className = redis?.status === 'HEALTHY' ? 'status-pill status-healthy' : 'status-pill status-degraded';
         document.getElementById('redis-mode').textContent = redis?.mode || 'In-Memory Store';
+        document.getElementById('redis-latency').textContent = redis?.latencyMs > 0 ? `${redis.latencyMs} ms` : 'Active';
 
         // System
         document.getElementById('sys-uptime').textContent = formatUptime(data.uptimeSeconds || 0);

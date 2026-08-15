@@ -159,6 +159,37 @@ class MongoMultiDbPool {
 
     throw new Error(`All MongoDB connection pools failed execution. Last error: ${lastError?.message}`);
   }
+
+  /**
+   * Measure latency & status metrics for each connection pool
+   */
+  async getPoolMetrics() {
+    const metrics = await Promise.all(
+      this.connections.map(async (item) => {
+        const start = Date.now();
+        let pingMs = -1;
+        let isHealthy = false;
+
+        try {
+          if (item.conn && item.conn.db) {
+            await item.conn.db.admin().ping();
+            pingMs = Date.now() - start;
+            isHealthy = true;
+          }
+        } catch (e) {
+          isHealthy = false;
+        }
+
+        return {
+          id: item.id,
+          status: isHealthy ? 'CONNECTED' : 'DISCONNECTED',
+          latencyMs: pingMs,
+        };
+      })
+    );
+
+    return metrics;
+  }
 }
 
 export const mongoPoolManager = new MongoMultiDbPool();

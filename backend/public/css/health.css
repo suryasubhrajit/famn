@@ -4,6 +4,8 @@
   --card-border: rgba(255, 255, 255, 0.08);
   --accent-purple: #6366f1;
   --accent-blue: #3b82f6;
+  --accent-emerald: #10b981;
+  --accent-cyan: #06b6d4;
   --text-main: #f3f4f6;
   --text-muted: #9ca3af;
   --status-green: #10b981;
@@ -105,6 +107,91 @@ header {
   0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
   70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* HERO KPI STAT CARDS GRID */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+}
+
+.kpi-card.emerald::before {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.kpi-card.cyan::before {
+  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+}
+
+.kpi-card.amber::before {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.kpi-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.kpi-icon {
+  font-size: 1.25rem;
+}
+
+.kpi-num {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.kpi-sub {
+  font-size: 0.78rem;
+  color: var(--status-green);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .grid {
@@ -246,8 +333,8 @@ header {
 .auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(7, 10, 18, 0.92);
-  backdrop-filter: blur(20px);
+  background: rgba(7, 10, 18, 0.95);
+  backdrop-filter: blur(24px);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -402,4 +489,11 @@ header {
   background: rgba(239, 68, 68, 0.15);
   color: var(--status-red);
   border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Blur content when locked */
+body.locked .container {
+  filter: blur(10px);
+  pointer-events: none;
+  user-select: none;
 }

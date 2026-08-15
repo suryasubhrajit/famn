@@ -192,3 +192,30 @@ export const getRoomMessages = async (roomId) => {
 
   return [];
 };
+
+export const getTelemetryKpis = async () => {
+  const redis = getRedisClient();
+  let activeRooms = memoryRoomMeta.size;
+  let totalMessages = 0;
+
+  for (const msgs of memoryRoomMessages.values()) {
+    totalMessages += msgs.length;
+  }
+
+  if (redis) {
+    try {
+      const keys = await redis.keys('room:*:meta');
+      activeRooms = Math.max(activeRooms, keys.length);
+      const msgKeys = await redis.keys('room:*:messages');
+      for (const k of msgKeys) {
+        const len = await redis.llen(k);
+        totalMessages += len;
+      }
+    } catch (err) {}
+  }
+
+  return {
+    activeRooms,
+    totalMessages,
+  };
+};
