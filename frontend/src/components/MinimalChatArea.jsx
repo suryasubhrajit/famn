@@ -461,8 +461,9 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
           sx={{
           height: '100%',
           overflowY: 'auto',
-          p: { xs: 1.5, sm: 3 },
-          pb: { xs: 'calc(120px + env(safe-area-inset-bottom, 0px))', sm: 3 },
+          px: { xs: 1.5, sm: 3 },
+          pt: { xs: 2.5, sm: 3 },
+          pb: { xs: 'calc(160px + env(safe-area-inset-bottom, 0px))', sm: 4 },
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
@@ -827,7 +828,8 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
             </Box>
           );
         })}
-
+        {/* Extra bottom scroll buffer space */}
+        <Box sx={{ height: { xs: 20, sm: 10 }, flexShrink: 0 }} />
         </Box>
       </Box>
 
