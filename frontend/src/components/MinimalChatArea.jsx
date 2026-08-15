@@ -431,20 +431,20 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
         minHeight: 0,
         bgcolor: theme.palette.background.default,
       }}>
-        {/* FIXED 3x4 Tiled Boofer Watermark Wallpaper Matrix (Stays stationary when chat scrolls) */}
+        {/* FIXED 3x6 Tiled Boofer Watermark Wallpaper Matrix (Stays stationary when chat scrolls) */}
         <Box
           sx={{
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
-            bottom: { xs: '75px', md: 0 },
+            bottom: 0,
             pointerEvents: 'none',
             userSelect: 'none',
             zIndex: 0,
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gridTemplateRows: 'repeat(4, 1fr)',
+            gridTemplateRows: 'repeat(6, 1fr)',
             alignItems: 'center',
             justifyItems: 'center',
             p: { xs: 0.5, sm: 2 },
@@ -452,7 +452,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
             filter: mode === 'dark' ? 'invert(1) brightness(1.8)' : 'grayscale(100%)',
           }}
         >
-          {[...Array(12)].map((_, i) => (
+          {[...Array(18)].map((_, i) => (
             <img
               key={i}
               src={`${BACKEND_URL}/public/images/boofer.png`}
