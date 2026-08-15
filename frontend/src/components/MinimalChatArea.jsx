@@ -360,39 +360,41 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
             </IconButton>
           </Tooltip>
 
-          <Button
-            component="a"
-            href="https://play.google.com/store/apps/details?id=com.shaadow.boofer.android"
-            target="_blank"
-            rel="noopener noreferrer"
-            size="small"
-            startIcon={
-              <img
-                src={`${BACKEND_URL}/public/images/boofer.png`}
-                alt="Boofer"
-                style={{ height: 14, objectFit: 'contain', filter: 'invert(1) brightness(2)' }}
-              />
-            }
-            sx={{
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              height: 28,
-              px: { xs: 0.8, sm: 1.2 },
-              borderRadius: '10px',
-              textTransform: 'none',
-              background: 'linear-gradient(135deg, #00A3FF 0%, #0066FF 100%)',
-              color: '#FFFFFF',
-              boxShadow: '0 2px 8px rgba(0, 163, 255, 0.3)',
-              transition: 'all 0.25s ease',
-              '&:hover': {
-                transform: 'scale(1.04)',
-                background: 'linear-gradient(135deg, #0092E6 0%, #0052CC 100%)',
-                boxShadow: '0 4px 14px rgba(0, 163, 255, 0.45)',
-              },
-            }}
-          >
-            {!isMobile && 'Get Boofer'}
-          </Button>
+          <Tooltip title="Get Boofer Android App">
+            <Button
+              component="a"
+              href="https://play.google.com/store/apps/details?id=com.shaadow.boofer.android"
+              target="_blank"
+              rel="noopener noreferrer"
+              size="small"
+              startIcon={
+                <img
+                  src={`${BACKEND_URL}/public/images/boofer.png`}
+                  alt="Boofer"
+                  style={{ height: 14, objectFit: 'contain', filter: 'invert(1) brightness(2)' }}
+                />
+              }
+              sx={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                height: 28,
+                px: { xs: 1, sm: 1.2 },
+                borderRadius: '10px',
+                textTransform: 'none',
+                background: 'linear-gradient(135deg, #00A3FF 0%, #0066FF 100%)',
+                color: '#FFFFFF',
+                boxShadow: '0 2px 8px rgba(0, 163, 255, 0.3)',
+                transition: 'all 0.25s ease',
+                '&:hover': {
+                  transform: 'scale(1.04)',
+                  background: 'linear-gradient(135deg, #0092E6 0%, #0052CC 100%)',
+                  boxShadow: '0 4px 14px rgba(0, 163, 255, 0.45)',
+                },
+              }}
+            >
+              {isMobile ? <Download size={14} style={{ marginLeft: 2 }} /> : 'Get Boofer'}
+            </Button>
+          </Tooltip>
 
           {peers.length < 2 && (
             <Chip
