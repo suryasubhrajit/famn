@@ -1,7 +1,19 @@
+import path from 'path';
 import { getRedisClient } from '../config/redis.js';
 import { mongoPoolManager } from '../config/mongoMultiDb.js';
 
+export const renderHealthDashboard = (req, res) => {
+  const dashboardPath = path.join(process.cwd(), 'public', 'health.html');
+  res.sendFile(dashboardPath);
+};
+
 export const getHealthStatus = (req, res) => {
+  const wantsHtml = req.query.format !== 'json' && req.accepts(['html', 'json']) === 'html';
+
+  if (wantsHtml) {
+    return renderHealthDashboard(req, res);
+  }
+
   const redis = getRedisClient();
   const mongoHealthyCount = mongoPoolManager.getHealthyConnections().length;
   const mongoTotalPools = mongoPoolManager.connections.length;

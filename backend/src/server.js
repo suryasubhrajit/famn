@@ -34,8 +34,10 @@ app.use('/uploads', (req, res, next) => {
   next();
 }, express.static(UPLOADS_DIR));
 
-// Mount REST API Router
+// Mount REST API Router & Health Dashboard
 app.use('/api', apiRoutes);
+app.get('/health', (req, res) => res.sendFile(path.join(process.cwd(), 'public', 'health.html')));
+app.get('/status', (req, res) => res.sendFile(path.join(process.cwd(), 'public', 'health.html')));
 
 // Initialize Socket.io Server
 const io = new Server(httpServer, {
