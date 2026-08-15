@@ -10,6 +10,7 @@ import {
   Tooltip,
   InputBase,
   Popover,
+  Drawer,
   Alert,
   Badge,
   useTheme,
@@ -38,6 +39,36 @@ import EmojiPicker from 'emoji-picker-react';
 import { useChat } from '../context/ChatContext';
 
 const DEFAULT_REACTIONS = ['👍', '❤️', '🔥', '😂'];
+
+const renderFormattedContent = (text, isSelf, mode) => {
+  if (!text) return null;
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (part.match(/^(https?:\/\/|www\.)/i)) {
+      const href = part.startsWith('www.') ? `https://${part}` : part;
+      return (
+        <a
+          key={index}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            color: isSelf ? '#bae6fd' : (mode === 'dark' ? '#60a5fa' : '#2563eb'),
+            textDecoration: 'underline',
+            wordBreak: 'break-all',
+            fontWeight: 600,
+          }}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
 
 export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
   const theme = useTheme();
@@ -214,10 +245,10 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
     if (customReactionMsgId) {
       addReaction(customReactionMsgId, emojiData.emoji);
       setCustomReactionMsgId(null);
+      setEmojiPickerAnchor(null);
     } else {
       setText((prev) => prev + emojiData.emoji);
     }
-    setEmojiPickerAnchor(null);
   };
 
   const handleBubbleClick = (e, msg) => {
@@ -649,7 +680,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
                   {msg.content && (
                     <Typography variant="body2" sx={{ fontSize: { xs: '0.85rem', sm: '0.9rem' },
                       lineHeight: 1.45, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                      {msg.content}
+                      {renderFormattedContent(msg.content, isSelf, mode)}
                     </Typography>
                   )}
 
@@ -918,12 +949,59 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
       </Box>
 
       {/* ── Emoji Picker ── */}
-      <Popover open={Boolean(emojiPickerAnchor)} anchorEl={emojiPickerAnchor}
-        onClose={() => { setEmojiPickerAnchor(null); setCustomReactionMsgId(null); }}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
-        <EmojiPicker onEmojiClick={handleEmojiClick} theme={mode} lazyLoadEmojis />
-      </Popover>
+      {isMobile ? (
+        <Drawer
+          anchor="bottom"
+          open={Boolean(emojiPickerAnchor)}
+          onClose={() => { setEmojiPickerAnchor(null); setCustomReactionMsgId(null); }}
+          PaperProps={{
+            sx: {
+              height: '100dvh',
+              width: '100vw',
+              bgcolor: mode === 'dark' ? '#0f172a' : '#ffffff',
+              display: 'flex',
+              flexDirection: 'column',
+              zIndex: 1400,
+            },
+          }}
+        >
+          <Box sx={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            px: 2, py: 1.5,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            bgcolor: mode === 'dark' ? '#1e293b' : '#f8fafc',
+          }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Choose Emojis</Typography>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => { setEmojiPickerAnchor(null); setCustomReactionMsgId(null); }}
+              sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 700 }}
+            >
+              Done
+            </Button>
+          </Box>
+          <Box sx={{ flex: 1, overflow: 'hidden' }}>
+            <EmojiPicker
+              onEmojiClick={handleEmojiClick}
+              theme={mode}
+              lazyLoadEmojis
+              width="100%"
+              height="100%"
+            />
+          </Box>
+        </Drawer>
+      ) : (
+        <Popover
+          open={Boolean(emojiPickerAnchor)}
+          anchorEl={emojiPickerAnchor}
+          onClose={() => { setEmojiPickerAnchor(null); setCustomReactionMsgId(null); }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+          transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        >
+          <EmojiPicker onEmojiClick={handleEmojiClick} theme={mode} lazyLoadEmojis />
+        </Popover>
+      )}
     </Box>
   );
 };
