@@ -18,6 +18,49 @@ export const isValidRoomId = (code) => {
   );
 };
 
+// Web Audio API Synthesized Soft Incoming Message Chime
+export const playIncomingMessageChime = () => {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+
+    // Soft 2-tone chime (660Hz -> 880Hz)
+    const now = ctx.currentTime;
+    osc1.frequency.setValueAtTime(660, now);
+    osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+
+    osc2.frequency.setValueAtTime(880, now + 0.12);
+    osc2.frequency.exponentialRampToValueAtTime(1320, now + 0.25);
+
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start(now);
+    osc1.stop(now + 0.15);
+
+    osc2.start(now + 0.12);
+    osc2.stop(now + 0.35);
+
+    setTimeout(() => {
+      ctx.close().catch(() => {});
+    }, 500);
+  } catch (e) {
+    // Autoplay policy fallback
+  }
+};
+
 // Persistent Device Identifier (peerToken) stored in localStorage
 export const getOrCreatePeerToken = () => {
   let token = localStorage.getItem('famn_peer_token');
@@ -94,9 +137,69 @@ export const ChatProvider = ({ children }) => {
   const [mode, setMode] = useState(() => localStorage.getItem('famn_theme') || 'light');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [activeModal, setActiveModal] = useState(null);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [copySuccess, setCopySuccess] = useState(false);
+
+  const BASE_TITLE = 'YoFAMN - Fun At Mid Night | Private Ephemeral P2P Chat';
+
+  // ── Restrict Page Reload & Tab Close (beforeunload) when in Active Room ──────
+  useEffect(() => {
+    if (!roomId) return;
+
+    const handleBeforeUnload = (e) => {
+      const msg = 'You are in an active ephemeral chat room. Reloading will destroy your session.';
+      e.preventDefault();
+      e.returnValue = msg;
+      return msg;
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [roomId]);
+
+  // ── Restrict Browser Back Button (popstate) when in Active Room ─────────────
+  useEffect(() => {
+    if (!roomId) return;
+
+    // Push history frame so Back button fires popstate instead of leaving page
+    window.history.pushState({ inRoom: true }, '', window.location.pathname);
+
+    const handlePopState = () => {
+      window.history.pushState({ inRoom: true }, '', window.location.pathname);
+      setShowLeaveModal(true);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [roomId]);
+
+  // ── Unread Count & Document Title Flashing ────────────────────────────────
+  useEffect(() => {
+    const clearUnreadOnFocus = () => {
+      if (!document.hidden) {
+        setUnreadCount(0);
+        document.title = BASE_TITLE;
+      }
+    };
+
+    window.addEventListener('focus', clearUnreadOnFocus);
+    document.addEventListener('visibilitychange', clearUnreadOnFocus);
+    return () => {
+      window.removeEventListener('focus', clearUnreadOnFocus);
+      document.removeEventListener('visibilitychange', clearUnreadOnFocus);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (unreadCount > 0) {
+      document.title = `(${unreadCount}) 🔔 New Message! - YoFAMN`;
+    } else {
+      document.title = BASE_TITLE;
+    }
+  }, [unreadCount]);
 
   const openFileViewer = (file) => {
     if (!file) return;
@@ -341,7 +444,27 @@ export const ChatProvider = ({ children }) => {
         if (prev.some((m) => m.id === newMsg.id)) return prev;
         return [...prev, newMsg];
       });
-      playChimeRef.current?.();
+
+      // Play audio chime for incoming messages from peer
+      if (newMsg.sender !== handle) {
+        playIncomingMessageChime();
+
+        // Increment unread count & flash document title if tab is inactive/hidden
+        if (document.hidden) {
+          setUnreadCount((prev) => prev + 1);
+
+          // Web Notifications API trigger
+          if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+              new Notification(`New message from ${newMsg.sender || 'Peer'}`, {
+                body: newMsg.text || (newMsg.file ? 'Sent an attachment' : 'New message received'),
+                icon: '/favicon.svg',
+                tag: 'famn-unread',
+              });
+            } catch (e) {}
+          }
+        }
+      }
     });
 
     newSocket.on('message:reaction_added', ({ messageId, emoji }) => {
@@ -662,6 +785,10 @@ export const ChatProvider = ({ children }) => {
         setSoundEnabled,
         activeModal,
         setActiveModal,
+        showLeaveModal,
+        setShowLeaveModal,
+        unreadCount,
+        setUnreadCount,
         selectedImage,
         setSelectedImage,
         selectedFile,

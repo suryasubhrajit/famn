@@ -34,6 +34,7 @@ import {
   Clock,
   Keyboard,
   Eye,
+  ArrowDown,
 } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 import { useChat } from '../context/ChatContext';
@@ -180,14 +181,46 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
   // The other person in the room (not yourself)
   const partner = peers.find((p) => p.handle !== handle);
 
-  // Auto-scroll to bottom whenever messages change
+  // Unread scroll indicator state
+  const [isScrolledUp, setIsScrolledUp] = useState(false);
+  const [unreadScrollCount, setUnreadScrollCount] = useState(0);
+
+  const handleStreamScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    const scrolledUp = distanceToBottom > 140;
+    setIsScrolledUp(scrolledUp);
+    if (!scrolledUp) {
+      setUnreadScrollCount(0);
+    }
+  };
+
+  const scrollToBottom = () => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      setUnreadScrollCount(0);
+      setIsScrolledUp(false);
+    }
+  };
+
+  // Auto-scroll to bottom or increment unread indicator whenever messages change
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (el) {
-      const timer = setTimeout(() => {
-        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-      }, 50);
-      return () => clearTimeout(timer);
+      const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      const isAtBottom = distanceToBottom < 160;
+
+      if (isAtBottom) {
+        const timer = setTimeout(() => {
+          el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+        }, 50);
+        setUnreadScrollCount(0);
+        return () => clearTimeout(timer);
+      } else {
+        setUnreadScrollCount((prev) => prev + 1);
+      }
     }
   }, [messages]);
 
@@ -470,6 +503,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
         {/* Scrollable Message Stream Container (Scrolls independently over fixed watermark) */}
         <Box
           ref={scrollContainerRef}
+          onScroll={handleStreamScroll}
           sx={{
           height: '100%',
           overflowY: 'auto',
@@ -870,6 +904,44 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
           <IconButton size="small" onClick={() => setReplyingTo(null)} sx={{ transition: 'transform 0.2s ease', '&:hover': { transform: 'scale(1.15)' } }}>
             <X size={16} />
           </IconButton>
+        </Paper>
+      )}
+
+      {/* ── Floating Unread Messages Indicator Pill ── */}
+      {isScrolledUp && unreadScrollCount > 0 && (
+        <Paper
+          elevation={6}
+          onClick={scrollToBottom}
+          sx={{
+            position: 'fixed',
+            bottom: { xs: '85px', md: '75px' },
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1300,
+            cursor: 'pointer',
+            px: 2,
+            py: 0.8,
+            borderRadius: '100px',
+            background: 'linear-gradient(135deg, #6366F1 0%, #10B981 100%)',
+            color: '#FFFFFF',
+            fontWeight: 800,
+            fontSize: '0.78rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            boxShadow: '0 8px 24px rgba(99, 102, 241, 0.45)',
+            animation: 'bouncePill 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            '@keyframes bouncePill': {
+              '0%': { opacity: 0, transform: 'translateX(-50%) translateY(12px)' },
+              '100%': { opacity: 1, transform: 'translateX(-50%) translateY(0)' },
+            },
+            '&:hover': {
+              transform: 'translateX(-50%) scale(1.05)',
+            },
+          }}
+        >
+          <ArrowDown size={15} />
+          {unreadScrollCount} {unreadScrollCount === 1 ? 'Unread Message' : 'Unread Messages'}
         </Paper>
       )}
 
