@@ -442,7 +442,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
     <Box
       sx={{
         width: '100%',
-        minHeight: '100%',
+        height: '100%',
         overflowY: 'auto',
         WebkitOverflowScrolling: 'touch',
         display: 'flex',
@@ -462,7 +462,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
           alignItems: 'center',
           justifyContent: 'flex-start',
           px: { xs: 2, sm: 3, md: 6 },
-          pt: { xs: 6, sm: 7, md: 7 },
+          pt: { xs: 8, sm: 8, md: 7 },
           pb: { xs: 5, md: 7 },
           background: mode === 'dark'
             ? 'radial-gradient(ellipse 80% 70% at 50% -10%, rgba(99,102,241,0.3) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 50%, rgba(139,92,246,0.15) 0%, transparent 60%), #0B0F19'

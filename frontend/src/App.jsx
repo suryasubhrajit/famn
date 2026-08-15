@@ -58,7 +58,7 @@ const AppLayout = () => {
         {/* Main Workspace (Right Column) */}
         <Box sx={{
           flex: 1, display: 'flex', flexDirection: 'column',
-          overflow: roomId ? 'hidden' : 'auto',
+          overflow: 'hidden',
           width: '100%', height: '100%',
         }}>
           {roomId ? (
