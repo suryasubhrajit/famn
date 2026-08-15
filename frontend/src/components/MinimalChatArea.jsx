@@ -255,7 +255,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
   return (
     <Box
       sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%',
-            bgcolor: theme.palette.background.default, overflow: 'hidden' }}
+            bgcolor: theme.palette.background.default, overflow: 'auto', minHeight: 0 }}
     >
       {/* ── Chat Header ── */}
       <Paper elevation={0} sx={{
@@ -357,7 +357,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
               },
             }}
           >
-            {isMobile ? 'Boofer' : 'Get Boofer'}
+            {!isMobile && 'Get Boofer'}
           </Button>
 
           <Chip
@@ -387,9 +387,10 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
 
       {/* ── Fixed Watermark & Scrollable Chat Stream Outer Wrapper ── */}
       <Box sx={{
-        flex: 1,
+        flex: '1 1 0',
         position: 'relative',
         overflow: 'hidden',
+        minHeight: 0,
         bgcolor: theme.palette.background.default,
       }}>
         {/* FIXED 3x3 Tiled Boofer Watermark Wallpaper Matrix (Stays stationary when chat scrolls) */}
@@ -823,26 +824,20 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
         </Paper>
       )}
 
-      {/* ── Floating Mobile Glassmorphism Input Bar ── */}
+      {/* ── Input Bar (fixed at bottom of flex column) ── */}
       <Box sx={{
-        position: { xs: 'sticky', md: 'static' },
-        bottom: 'calc(10px + env(safe-area-inset-bottom, 0px))',
-        left: 0,
-        right: 0,
-        zIndex: 10,
-        p: { xs: 0.8, sm: 1.5 },
-        mx: { xs: 1.2, md: 0 },
-        mb: { xs: 1.2, md: 0 },
-        bgcolor: mode === 'dark' ? 'rgba(18, 24, 38, 0.88)' : 'rgba(255, 255, 255, 0.88)',
+        flexShrink: 0,
+        p: { xs: '8px 10px', sm: '10px 16px', md: '10px 16px' },
+        pb: { xs: 'calc(10px + env(safe-area-inset-bottom, 0px))', sm: '10px' },
+        mx: 0,
+        bgcolor: mode === 'dark' ? 'rgba(18, 24, 38, 0.95)' : 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderRadius: { xs: '24px', md: '0px' },
-        border: `1px solid ${theme.palette.divider}`,
-        borderTop: { md: `1px solid ${theme.palette.divider}` },
+        borderTop: `1px solid ${theme.palette.divider}`,
         boxShadow: mode === 'dark'
-          ? '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)'
-          : '0 10px 30px rgba(99, 102, 241, 0.15), 0 0 0 1px rgba(99, 102, 241, 0.15)',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          ? '0 -4px 20px rgba(0, 0, 0, 0.3)'
+          : '0 -4px 20px rgba(99, 102, 241, 0.08)',
+        zIndex: 10,
       }}>
         {typingUser && (
           <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic',
