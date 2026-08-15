@@ -259,55 +259,55 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
     >
       {/* ── Chat Header ── */}
       <Paper elevation={0} sx={{
-        px: { xs: 1.5, sm: 3 }, py: 1.2,
+        px: { xs: 1.2, sm: 3 }, py: 1,
         bgcolor: theme.palette.background.paper,
         borderBottom: `1px solid ${theme.palette.divider}`,
         borderRadius: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         transition: 'background-color 0.3s ease, border-color 0.3s ease',
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, minWidth: 0, flex: 1 }}>
           {isMobile && (
-            <IconButton onClick={onOpenMobileDrawer} size="small">
+            <IconButton onClick={onOpenMobileDrawer} size="small" sx={{ p: 0.5 }}>
               <MenuIcon size={20} />
             </IconButton>
           )}
 
           {partner ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
               <Badge overlap="circular" anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                variant="dot" sx={{ '& .MuiBadge-badge': { backgroundColor: '#10B981', width: 10, height: 10 } }}>
-                <Avatar sx={{ width: 36, height: 36, bgcolor: partner.color || '#6366F1', fontSize: '0.9rem', fontWeight: 700, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                variant="dot" sx={{ '& .MuiBadge-badge': { backgroundColor: '#10B981', width: 9, height: 9 } }}>
+                <Avatar sx={{ width: 34, height: 34, bgcolor: partner.color || '#6366F1', fontSize: '0.85rem', fontWeight: 700 }}>
                   {partner.handle.charAt(0).toUpperCase()}
                 </Avatar>
               </Badge>
-              <Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 800, fontSize: { xs: '0.9rem', sm: '1.02rem' }, lineHeight: 1.2 }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="subtitle2" noWrap sx={{ fontWeight: 800, fontSize: { xs: '0.88rem', sm: '1.02rem' }, lineHeight: 1.2, maxWidth: { xs: 100, sm: 200, md: 'none' } }}>
                   {partner.handle}
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#10B981', fontSize: '0.7rem', fontWeight: 600 }}>
-                  {typingUser === partner.handle ? 'typing…' : '🟢 Online now'}
+                <Typography variant="caption" noWrap sx={{ color: '#10B981', fontSize: '0.68rem', fontWeight: 600, display: 'block' }}>
+                  {typingUser === partner.handle ? 'typing…' : '🟢 Online'}
                 </Typography>
               </Box>
             </Box>
           ) : (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
-              <Avatar sx={{ width: 36, height: 36, bgcolor: 'background.subtle', color: 'text.secondary' }}>
-                <Lock size={18} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+              <Avatar sx={{ width: 34, height: 34, bgcolor: 'background.subtle', color: 'text.secondary' }}>
+                <Lock size={16} />
               </Avatar>
-              <Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 800, fontSize: { xs: '0.9rem', sm: '1rem' }, lineHeight: 1.2 }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="subtitle2" noWrap sx={{ fontWeight: 800, fontSize: { xs: '0.88rem', sm: '1rem' }, lineHeight: 1.2, maxWidth: { xs: 110, sm: 200, md: 'none' } }}>
                   Nobody here yet
                 </Typography>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
-                  Share the room link to invite someone
+                <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontSize: '0.68rem', display: 'block' }}>
+                  Share room code to invite
                 </Typography>
               </Box>
             </Box>
           )}
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, flexShrink: 0 }}>
           <Tooltip title="Keyboard Shortcuts (Ctrl+/)">
             <IconButton
               size="small"
@@ -317,6 +317,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
                 height: 28,
                 borderRadius: '8px',
                 bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                display: { xs: 'none', sm: 'inline-flex' },
                 transition: 'all 0.2s ease',
                 '&:hover': { bgcolor: 'primary.main', color: '#fff', transform: 'scale(1.08)' },
               }}
@@ -342,7 +343,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
               fontSize: '0.72rem',
               fontWeight: 700,
               height: 28,
-              px: 1.2,
+              px: { xs: 0.8, sm: 1.2 },
               borderRadius: '10px',
               textTransform: 'none',
               background: 'linear-gradient(135deg, #00A3FF 0%, #0066FF 100%)',
@@ -356,16 +357,16 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
               },
             }}
           >
-            Get Boofer
+            {isMobile ? 'Boofer' : 'Get Boofer'}
           </Button>
 
           <Chip
-            icon={<UserPlus size={14} color="#6366F1" />}
+            icon={<UserPlus size={13} color="#6366F1" />}
             label={copySuccess ? 'Copied!' : 'Invite'}
             size="small"
             onClick={copyInviteLink}
             sx={{
-              fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', height: 28, px: 0.5,
+              fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', height: 28, px: 0.3,
               bgcolor: 'rgba(99,102,241,0.1)', color: 'primary.main',
               border: '1px solid rgba(99,102,241,0.3)',
               transition: 'all 0.25s ease',
@@ -822,9 +823,27 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
         </Paper>
       )}
 
-      {/* ── Input Bar ── */}
-      <Box sx={{ p: { xs: 1, sm: 1.8 }, bgcolor: theme.palette.background.paper,
-                 borderTop: `1px solid ${theme.palette.divider}` }}>
+      {/* ── Floating Mobile Glassmorphism Input Bar ── */}
+      <Box sx={{
+        position: { xs: 'sticky', md: 'static' },
+        bottom: 'calc(10px + env(safe-area-inset-bottom, 0px))',
+        left: 0,
+        right: 0,
+        zIndex: 10,
+        p: { xs: 0.8, sm: 1.5 },
+        mx: { xs: 1.2, md: 0 },
+        mb: { xs: 1.2, md: 0 },
+        bgcolor: mode === 'dark' ? 'rgba(18, 24, 38, 0.88)' : 'rgba(255, 255, 255, 0.88)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderRadius: { xs: '24px', md: '0px' },
+        border: `1px solid ${theme.palette.divider}`,
+        borderTop: { md: `1px solid ${theme.palette.divider}` },
+        boxShadow: mode === 'dark'
+          ? '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)'
+          : '0 10px 30px rgba(99, 102, 241, 0.15), 0 0 0 1px rgba(99, 102, 241, 0.15)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      }}>
         {typingUser && (
           <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic',
             display: 'block', mb: 0.5, px: 1, fontSize: '0.7rem' }}>
@@ -834,8 +853,8 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
 
         <Paper elevation={0} sx={{
           display: 'flex', alignItems: 'center',
-          p: { xs: '2px 6px', sm: '4px 10px' },
-          borderRadius: '16px',
+          p: { xs: '3px 8px', sm: '4px 10px' },
+          borderRadius: { xs: '20px', sm: '16px' },
           bgcolor: canChat ? theme.palette.background.subtle : (mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'),
           border: `1px solid ${canChat ? theme.palette.divider : 'rgba(245,158,11,0.3)'}`,
           transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -868,10 +887,10 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
             inputRef={textInputRef}
             placeholder={
               !canChat
-                ? 'Waiting for your partner to join…'
+                ? 'Waiting for partner…'
                 : replyingTo
                   ? `Replying to ${replyingTo.sender?.handle}…`
-                  : `Message ${partner ? partner.handle : 'the room'}…`
+                  : `Message ${partner ? partner.handle : 'room'}…`
             }
             disabled={!canChat}
             value={text}
@@ -884,7 +903,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
             <span>
               <IconButton onClick={handleSend} disabled={!text.trim() || !canChat} sx={{
                 width: { xs: 34, sm: 38 }, height: { xs: 34, sm: 38 },
-                borderRadius: '10px', p: 0,
+                borderRadius: '12px', p: 0,
                 bgcolor: text.trim() && canChat ? 'primary.main' : 'transparent',
                 color: text.trim() && canChat ? '#fff' : 'text.disabled',
                 transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
