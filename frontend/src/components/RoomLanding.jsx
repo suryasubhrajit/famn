@@ -599,7 +599,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
               sx={{
                 py: 1.8,
                 borderRadius: '14px',
-                fontSize: '1rem',
+                fontSize: { xs: '0.92rem', sm: '1rem' },
                 fontWeight: 800,
                 background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
                 boxShadow: '0 8px 28px rgba(99,102,241,0.45)',
@@ -612,7 +612,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
                 },
               }}
             >
-              Create Instant Room & Get Link
+              Create Instant Room
             </Button>
 
             <Divider sx={{ my: 2, fontSize: '0.7rem', fontWeight: 700, color: 'text.secondary', letterSpacing: '0.08em' }}>
@@ -947,6 +947,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
           borderTop: `1px solid ${theme.palette.divider}`,
           px: { xs: 2, md: 6 },
           py: 2,
+          pb: { xs: 'calc(64px + env(safe-area-inset-bottom, 0px))', sm: 3 },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
