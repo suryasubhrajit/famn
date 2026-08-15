@@ -334,31 +334,81 @@
       }
     };
 
+    const AUTH_KEY = 'famn_health_authenticated';
+    const AUTH_TIME_KEY = 'famn_health_auth_time';
+    const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 Minutes auto-logout timeframe
+    let lastActivityTime = Date.now();
+    let idleCheckInterval = null;
+
+    const resetActivityTimer = () => {
+      lastActivityTime = Date.now();
+    };
+
+    // Track user activity to refresh idle timer
+    ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, resetActivityTimer, { passive: true });
+    });
+
     const unlockDashboard = () => {
+      const now = Date.now();
       sessionStorage.setItem(AUTH_KEY, 'true');
+      sessionStorage.setItem(AUTH_TIME_KEY, now.toString());
+      lastActivityTime = now;
+
       document.body.classList.remove('locked');
       document.getElementById('auth-overlay').style.display = 'none';
       document.getElementById('dashboard-content').style.display = 'block';
+      
       initTelemetry();
+      startIdleMonitor();
     };
 
-    const lockDashboard = () => {
+    const lockDashboard = (reason = '') => {
       sessionStorage.removeItem(AUTH_KEY);
+      sessionStorage.removeItem(AUTH_TIME_KEY);
+
       document.body.classList.add('locked');
       document.getElementById('dashboard-content').style.display = 'none';
       document.getElementById('auth-overlay').style.display = 'flex';
+
       if (telemetryInterval) {
         clearInterval(telemetryInterval);
         telemetryInterval = null;
       }
+      if (idleCheckInterval) {
+        clearInterval(idleCheckInterval);
+        idleCheckInterval = null;
+      }
+
+      if (reason) {
+        const errEl = document.getElementById('auth-error');
+        errEl.textContent = reason;
+        errEl.style.display = 'block';
+      }
+    };
+
+    const startIdleMonitor = () => {
+      if (idleCheckInterval) clearInterval(idleCheckInterval);
+      idleCheckInterval = setInterval(() => {
+        const now = Date.now();
+        const authTime = parseInt(sessionStorage.getItem(AUTH_TIME_KEY) || '0', 10);
+        
+        // Auto-logout if idle for 15 minutes or if total session age exceeds 15 minutes
+        if ((now - lastActivityTime >= SESSION_TIMEOUT_MS) || (now - authTime >= SESSION_TIMEOUT_MS)) {
+          lockDashboard('Session expired due to 15-minute inactivity limit. Re-authentication required.');
+        }
+      }, 10000);
     };
 
     const checkExistingAuth = () => {
       const isAuth = sessionStorage.getItem(AUTH_KEY) === 'true';
-      if (isAuth) {
+      const authTime = parseInt(sessionStorage.getItem(AUTH_TIME_KEY) || '0', 10);
+      const now = Date.now();
+
+      if (isAuth && authTime && (now - authTime < SESSION_TIMEOUT_MS)) {
         unlockDashboard();
       } else {
-        lockDashboard();
+        lockDashboard(isAuth ? 'Previous session expired. Please authenticate again.' : '');
       }
     };
 
