@@ -387,7 +387,9 @@
 
     const fetchTelemetry = async () => {
       try {
-        const res = await fetch('/api/health?format=json');
+        const res = await fetch('/api/health', {
+          headers: { 'Accept': 'application/json' }
+        });
         const data = await res.json();
 
         // MongoDB
