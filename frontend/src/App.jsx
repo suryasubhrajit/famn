@@ -56,10 +56,9 @@ const AppLayout = () => {
 
         {/* Main Workspace (Right Column) */}
         <Box sx={{
-          flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          flex: 1, display: 'flex', flexDirection: 'column',
+          overflow: roomId ? 'hidden' : 'auto',
           width: '100%', height: '100%',
-          alignItems: 'stretch',
-          justifyContent: 'stretch',
         }}>
           {roomId ? (
             <MinimalChatArea onOpenMobileDrawer={toggleMobileDrawer} />

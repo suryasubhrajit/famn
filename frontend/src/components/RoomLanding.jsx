@@ -58,19 +58,21 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
     <Box
       sx={{
         width: '100%',
-        height: '100%',
+        minHeight: '100%',
         overflowY: 'auto',
         WebkitOverflowScrolling: 'touch',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        justifyContent: 'flex-start',
         p: { xs: 2, sm: 4 },
-        pb: { xs: '60px', sm: 6 },
+        pb: { xs: 6, sm: 8 },
         bgcolor: theme.palette.background.default,
+        gap: 3,
       }}
     >
       {/* Mobile Top Bar (Drawer opener for mobile) */}
-      <Box sx={{ width: '100%', maxWidth: 540, display: { xs: 'flex', md: 'none' }, alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+      <Box sx={{ width: '100%', maxWidth: 540, display: { xs: 'flex', md: 'none' }, alignItems: 'center', justifyContent: 'space-between', pt: 1 }}>
         <IconButton onClick={onOpenMobileDrawer} size="small" sx={{ p: 0.8, bgcolor: 'background.paper', border: `1px solid ${theme.palette.divider}` }}>
           <MenuIcon size={20} />
         </IconButton>
@@ -79,7 +81,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
         </Typography>
       </Box>
 
-      {/* Main Action Card */}
+      {/* ── SECTION 1: PRIMARY ACTION CARD (Room Creation & Joining) ── */}
       <Card
         elevation={0}
         sx={{
@@ -90,7 +92,6 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
           border: `1px solid ${theme.palette.divider}`,
           boxShadow: mode === 'dark' ? '0 12px 40px rgba(0, 0, 0, 0.4)' : '0 12px 30px rgba(0, 0, 0, 0.05)',
           overflow: 'hidden',
-          my: { xs: 0, md: 'auto' },
         }}
       >
         <CardContent sx={{ p: { xs: 2.5, sm: 4 }, textAlign: 'center' }}>
@@ -111,7 +112,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
             </Alert>
           )}
 
-          {/* Main Icon */}
+          {/* Main App Icon */}
           <img
             src={`${BACKEND_URL}/public/logo.svg?v=3`}
             alt="Fun At Mid Night"
@@ -259,11 +260,10 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
         </CardContent>
       </Card>
 
-      {/* ── POWERED BY BOOFER - Dedicated Highlight Card ── */}
+      {/* ── SECTION 2: POWERED BY BOOFER HIGHLIGHT CARD ── */}
       <Paper
         elevation={0}
         sx={{
-          mt: 3,
           maxWidth: 540,
           width: '100%',
           p: { xs: 2.5, sm: 3 },
@@ -317,12 +317,10 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
         </Button>
       </Paper>
 
-      {/* ── Shaadow Platforms Ecosystem Footer ── */}
+      {/* ── SECTION 3: SHAADOW PLATFORMS FOOTER & LEGAL CARD ── */}
       <Box
         component="footer"
         sx={{
-          mt: 3,
-          mb: 2,
           maxWidth: 540,
           width: '100%',
           color: 'text.secondary',
@@ -419,7 +417,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
         </Paper>
       </Box>
 
-      {/* ── Legal & Security Dialog ── */}
+      {/* ── Legal & Security Dialog Modals ── */}
       <Dialog
         open={Boolean(legalModal)}
         onClose={() => setLegalModal(null)}
