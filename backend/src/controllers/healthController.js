@@ -1,12 +1,34 @@
 import { getRedisClient } from '../config/redis.js';
+import { mongoPoolManager } from '../config/mongoMultiDb.js';
 
 export const getHealthStatus = (req, res) => {
   const redis = getRedisClient();
+  const mongoHealthyCount = mongoPoolManager.getHealthyConnections().length;
+  const mongoTotalPools = mongoPoolManager.connections.length;
 
   res.json({
     status: 'ok',
-    uptime: process.uptime(),
-    redisConnected: Boolean(redis && redis.status === 'ready'),
+    service: 'FAMN Ephemeral Chat Backend',
+    uptimeSeconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
+    services: {
+      redis: {
+        status: redis && redis.status === 'ready' ? 'HEALTHY' : 'DEGRADED_OR_OFFLINE',
+        mode: redis ? 'Cloud Redis' : 'In-Memory Ephemeral Fallback',
+      },
+      mongodbMultiCluster: {
+        status: mongoHealthyCount > 0 ? 'HEALTHY' : mongoTotalPools > 0 ? 'FAILOVER_ACTIVE' : 'NOT_CONFIGURED',
+        healthyPools: mongoHealthyCount,
+        totalPools: mongoTotalPools,
+        pools: mongoPoolManager.connections.map((p) => ({
+          id: p.id,
+          status: p.isHealthy() ? 'CONNECTED' : 'DISCONNECTED',
+        })),
+      },
+    },
+    system: {
+      nodeVersion: process.version,
+      memoryUsageMB: Math.round(process.memoryUsage().rss / (1024 * 1024)),
+    },
   });
 };
