@@ -28,11 +28,12 @@ const AppLayout = () => {
       <CssBaseline />
       <Box
         sx={{
-          width: '100vw',
-          height: '100vh',
+          width: '100%',
+          minHeight: '100dvh',
+          height: roomId ? '100dvh' : 'auto',
           display: 'flex',
           bgcolor: 'background.default',
-          overflow: 'hidden',
+          overflow: roomId ? 'hidden' : 'visible',
         }}
       >
         {/* Desktop / Tablet Left Column Sidebar */}
@@ -58,8 +59,8 @@ const AppLayout = () => {
         {/* Main Workspace (Right Column) */}
         <Box sx={{
           flex: 1, display: 'flex', flexDirection: 'column',
-          overflow: 'hidden',
-          width: '100%', height: '100%',
+          overflow: roomId ? 'hidden' : 'visible',
+          width: '100%', minHeight: '100%',
         }}>
           {roomId ? (
             <MinimalChatArea onOpenMobileDrawer={toggleMobileDrawer} />

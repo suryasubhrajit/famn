@@ -442,9 +442,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
     <Box
       sx={{
         width: '100%',
-        height: '100%',
-        overflowY: 'auto',
-        WebkitOverflowScrolling: 'touch',
+        minHeight: '100%',
         display: 'flex',
         flexDirection: 'column',
         bgcolor: theme.palette.background.default,
@@ -462,7 +460,7 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
           alignItems: 'center',
           justifyContent: 'flex-start',
           px: { xs: 2, sm: 3, md: 6 },
-          pt: { xs: 8, sm: 8, md: 7 },
+          pt: { xs: 4, sm: 6, md: 7 },
           pb: { xs: 5, md: 7 },
           background: mode === 'dark'
             ? 'radial-gradient(ellipse 80% 70% at 50% -10%, rgba(99,102,241,0.3) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 50%, rgba(139,92,246,0.15) 0%, transparent 60%), #0B0F19'
@@ -492,12 +490,13 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
           </IconButton>
         )}
 
-        {/* ── Badge Tag ── */}
+        {/* ── Badge Tag (Hidden on mobile to save vertical space) ── */}
         <Chip
           icon={<Sparkles size={13} />}
           label="INSTANT EPHEMERAL CHAT · NO SIGNUP REQUIRED"
           size="small"
           sx={{
+            display: { xs: 'none', sm: 'inline-flex' },
             mb: 3,
             px: 1.5,
             py: 2,
