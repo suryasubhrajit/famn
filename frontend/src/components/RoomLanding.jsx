@@ -10,28 +10,28 @@ import {
   Chip,
   Paper,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   IconButton,
   useTheme,
   useMediaQuery,
+  Breadcrumbs,
+  Link,
 } from '@mui/material';
 import {
   ShieldCheck,
   Zap,
   ArrowRight,
+  ArrowLeft,
   Lock,
   AlertCircle,
   FileText,
-  X,
   Menu as MenuIcon,
   Download,
   Sparkles,
   MessageCircle,
   Eye,
   Clock,
+  ExternalLink,
+  CheckCircle2,
 } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 
@@ -58,13 +58,366 @@ const FeaturePill = ({ icon, label, mode }) => (
   </Box>
 );
 
+/* ════════════════════════════════════════════════════════════
+   STANDALONE LEGAL PAGE VIEW (Privacy, Terms, Security Specs)
+   ════════════════════════════════════════════════════════════ */
+const LegalPageView = ({ pageKey, onBack, onSelectPage, mode }) => {
+  const theme = useTheme();
+
+  return (
+    <Box
+      sx={{
+        width: '100%',
+        minHeight: '100%',
+        bgcolor: theme.palette.background.default,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        p: { xs: 2, sm: 4, md: 6 },
+        pb: { xs: 8, md: 10 },
+      }}
+    >
+      {/* Container */}
+      <Box sx={{ width: '100%', maxWidth: 840 }}>
+        {/* Top Back Navigation Bar */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+          <Button
+            onClick={onBack}
+            startIcon={<ArrowLeft size={18} />}
+            variant="outlined"
+            sx={{
+              borderRadius: '12px',
+              px: 2.2,
+              py: 0.8,
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              borderColor: theme.palette.divider,
+              color: 'text.primary',
+              '&:hover': {
+                bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+              },
+            }}
+          >
+            Back to Home
+          </Button>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ShieldCheck size={18} color={theme.palette.primary.main} />
+            <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: '0.08em' }}>
+              SHAADOW PLATFORMS LEGAL & COMPLIANCE
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Hero Banner for Document */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 3, sm: 4 },
+            borderRadius: '24px',
+            bgcolor: mode === 'dark' ? 'rgba(17, 24, 39, 0.7)' : '#FFFFFF',
+            border: `1px solid ${theme.palette.divider}`,
+            boxShadow: mode === 'dark' ? '0 16px 40px rgba(0,0,0,0.4)' : '0 12px 32px rgba(0,0,0,0.05)',
+            mb: 4,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: '16px',
+                bgcolor:
+                  pageKey === 'privacy'
+                    ? 'rgba(16, 185, 129, 0.15)'
+                    : pageKey === 'terms'
+                    ? 'rgba(99, 102, 241, 0.15)'
+                    : 'rgba(0, 163, 255, 0.15)',
+                display: 'inline-flex',
+              }}
+            >
+              {pageKey === 'privacy' && <Lock size={28} color="#10B981" />}
+              {pageKey === 'terms' && <FileText size={28} color="#6366F1" />}
+              {pageKey === 'security' && <ShieldCheck size={28} color="#00A3FF" />}
+            </Box>
+
+            <Box>
+              <Chip
+                label={
+                  pageKey === 'privacy'
+                    ? 'ZERO-LOGS GUARANTEE'
+                    : pageKey === 'terms'
+                    ? 'OFFICIAL TERMS'
+                    : 'ENCRYPTION PROTOCOL'
+                }
+                size="small"
+                sx={{
+                  height: 22,
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  bgcolor:
+                    pageKey === 'privacy'
+                      ? 'rgba(16, 185, 129, 0.15)'
+                      : pageKey === 'terms'
+                      ? 'rgba(99, 102, 241, 0.15)'
+                      : 'rgba(0, 163, 255, 0.15)',
+                  color:
+                    pageKey === 'privacy'
+                      ? '#10B981'
+                      : pageKey === 'terms'
+                      ? '#6366F1'
+                      : '#00A3FF',
+                  mb: 0.5,
+                }}
+              />
+              <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: '1.5rem', sm: '2rem' }, letterSpacing: '-0.02em' }}>
+                {pageKey === 'privacy' && 'Privacy Policy & Zero-Logs Specification'}
+                {pageKey === 'terms' && 'Terms of Service & Usage Policy'}
+                {pageKey === 'security' && 'Security Specs & Architecture Protocols'}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.85rem' }}>
+            Effective Date: 2026 • Official Ephemeral Protocol Specification by Shaadow Platforms.
+          </Typography>
+        </Paper>
+
+        {/* Detailed Document Content Body */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 3, sm: 5 },
+            borderRadius: '24px',
+            bgcolor: mode === 'dark' ? 'rgba(17, 24, 39, 0.6)' : '#FFFFFF',
+            border: `1px solid ${theme.palette.divider}`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+            mb: 4,
+          }}
+        >
+          {pageKey === 'privacy' && (
+            <>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  1. Zero Data Retention Architecture
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  Fun At Mid Night (FAMN) by Shaadow Platforms operates on a strict zero-retention ephemeral memory architecture. Messages exchanged during temporary chat sessions are retained exclusively in volatile RAM and WebRTC peer data channels. No message logs, chat histories, or file attachments are stored to persistent hard disks or external databases.
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  2. Automated Ephemeral Destruction
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem', mb: 1.5 }}>
+                  Once both users leave a chat room, or after a 5-minute empty room grace period, backend Redis keys and socket memory queues automatically purge all message history permanently.
+                </Typography>
+                <Box sx={{ p: 2, borderRadius: '14px', bgcolor: mode === 'dark' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: '#10B981', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircle2 size={16} /> Guaranteed Non-Recoverability
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block', lineHeight: 1.5 }}>
+                    After room deletion, chat data cannot be recovered by server administrators, third parties, or law enforcement, as memory structures are completely overwritten in RAM.
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  3. No User Registration & Zero Tracker Cookies
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  Users access FAMN without registering accounts, supplying email addresses, or providing phone numbers. Session handles are generated dynamically and disappear when your browser tab closes. No persistent tracking cookies or third-party behavioral analytics scripts are embedded into our client application.
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  4. Peer-to-Peer Media Direct Streaming
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  Photos, video clips, and document attachments are transmitted directly between connected browsers via WebRTC peer data channels whenever possible. Temporary fallback server buffers are capped at 20MB and cleared immediately after peer transfer completes.
+                </Typography>
+              </Box>
+            </>
+          )}
+
+          {pageKey === 'terms' && (
+            <>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  1. Acceptance of Ephemeral Terms
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  By accessing or using Fun At Mid Night (FAMN) and Shaadow Platforms communication tools, you acknowledge and agree to comply with these Terms of Service. If you do not agree to these terms, please refrain from using our services.
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  2. Acceptable Conduct & Prohibited Activities
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem', mb: 1.5 }}>
+                  You agree to use FAMN strictly for lawful communication. You are explicitly prohibited from engaging in:
+                </Typography>
+                <Box component="ul" sx={{ color: 'text.secondary', fontSize: '0.9rem', pl: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <li>Transmitting illegal, violent, or abusive material.</li>
+                  <li>Executing automated denial-of-service (DDoS) attacks or socket flood scripts against our signaling servers.</li>
+                  <li>Attempting to bypass automated rate-limiting algorithms or collision-free room ID verification protocols.</li>
+                </Box>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  3. Transience of Data & No Recovery Guarantee
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  FAMN chat rooms are temporary by design. Shaadow Platforms provides no storage, archive, or data recovery services for expired chat rooms. Once a room closes, all associated content is permanently destroyed without backup.
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  4. Service Availability & Limitation of Liability
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  Shaadow Platforms provides services on an "AS IS" and "AS AVAILABLE" basis without warranties of uninterrupted operation or guaranteed uptime. Shaadow Platforms is not liable for data lost due to network disconnections or room expiration timeouts.
+                </Typography>
+              </Box>
+            </>
+          )}
+
+          {pageKey === 'security' && (
+            <>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  1. WebRTC DTLS-SRTP Transport Encryption
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  Direct peer-to-peer data channels established between participants leverage WebRTC Datagram Transport Layer Security (DTLS) and Secure Real-time Transport Protocol (SRTP). This ensures end-to-end transport layer privacy for chat messages and media streams.
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  2. Dynamic Cryptographic Room Identifiers
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  Room codes (e.g. `tsy-cusn-bti`) are generated using cryptographically strong random token generators with zero-collision key spaces. Rooms are strictly capped at 2 participants to prevent unauthorized eavesdropping.
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  3. Automated Rate Limiting & Anti-Abuse Filters
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  Signaling gateways enforce strict per-IP connection limits, room creation rate throttling, and payload size bounds (maximum 20MB per file chunk). Socket connections exceeding safe rate thresholds are automatically disconnected.
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: 'primary.main' }}>
+                  4. Ephemeral Infrastructure Isolation
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: '0.92rem' }}>
+                  Our backend signaling microservices operate inside isolated RAM containers without access to persistent block storage devices. Memory buffers are continuously overwritten to ensure total zero-disk footprints.
+                </Typography>
+              </Box>
+            </>
+          )}
+        </Paper>
+
+        {/* Bottom Switcher Tabs */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            borderRadius: '20px',
+            bgcolor: mode === 'dark' ? 'rgba(17, 24, 39, 0.7)' : '#FFFFFF',
+            border: `1px solid ${theme.palette.divider}`,
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+          }}
+        >
+          <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: '0.08em' }}>
+            OTHER LEGAL & COMPLIANCE PAGES:
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button
+              size="small"
+              variant={pageKey === 'privacy' ? 'contained' : 'outlined'}
+              onClick={() => onSelectPage('privacy')}
+              startIcon={<Lock size={14} />}
+              sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}
+            >
+              Privacy Policy
+            </Button>
+
+            <Button
+              size="small"
+              variant={pageKey === 'terms' ? 'contained' : 'outlined'}
+              onClick={() => onSelectPage('terms')}
+              startIcon={<FileText size={14} />}
+              sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}
+            >
+              Terms of Service
+            </Button>
+
+            <Button
+              size="small"
+              variant={pageKey === 'security' ? 'contained' : 'outlined'}
+              onClick={() => onSelectPage('security')}
+              startIcon={<ShieldCheck size={14} />}
+              sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}
+            >
+              Security Specs
+            </Button>
+          </Box>
+        </Paper>
+
+        {/* Footer info */}
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
+            © 2026 Shaadow Platforms. All rights reserved. • Ephemeral Memory Protocol
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
 export const RoomLanding = ({ onOpenMobileDrawer }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { createNewRoom, joinRoom, handle, mode, roomNoticeAlert, setRoomNoticeAlert } = useChat();
   const [joinInput, setJoinInput] = useState('');
   const [joining, setJoining] = useState(false);
-  const [legalModal, setLegalModal] = useState(null);
+  const [activeLegalPage, setActiveLegalPage] = useState(null); // 'privacy' | 'terms' | 'security' | null
 
   const handleJoin = async (e) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -72,6 +425,18 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
     setJoining(true);
     try { await joinRoom(joinInput.trim()); } finally { setJoining(false); }
   };
+
+  // Render standalone Legal Page if selected
+  if (activeLegalPage) {
+    return (
+      <LegalPageView
+        pageKey={activeLegalPage}
+        onBack={() => setActiveLegalPage(null)}
+        onSelectPage={(newKey) => setActiveLegalPage(newKey)}
+        mode={mode}
+      />
+    );
+  }
 
   return (
     <Box
@@ -543,24 +908,30 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.6 }}>
             {[
-              { label: 'Privacy Policy & Zero-Logs', key: 'privacy', icon: <Lock size={13} /> },
-              { label: 'Terms of Service', key: 'terms', icon: <FileText size={13} /> },
-              { label: 'Security Specs & Protocols', key: 'security', icon: <ShieldCheck size={13} /> },
+              { label: 'Privacy Policy & Zero-Logs', key: 'privacy', icon: <Lock size={14} /> },
+              { label: 'Terms of Service', key: 'terms', icon: <FileText size={14} /> },
+              { label: 'Security Specs & Protocols', key: 'security', icon: <ShieldCheck size={14} /> },
             ].map(({ label, key, icon }) => (
               <Button
                 key={key}
                 size="small"
-                onClick={() => setLegalModal(key)}
+                onClick={() => setActiveLegalPage(key)}
                 startIcon={icon}
                 sx={{
                   justifyContent: 'flex-start',
-                  p: 0,
+                  px: 1.5,
+                  py: 0.8,
+                  borderRadius: '10px',
                   textTransform: 'none',
                   color: 'text.secondary',
-                  fontSize: '0.78rem',
+                  fontSize: '0.8rem',
                   fontWeight: 600,
                   minWidth: 0,
-                  '&:hover': { color: 'primary.main', bgcolor: 'transparent' },
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    color: 'primary.main',
+                    bgcolor: mode === 'dark' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.08)',
+                  },
                 }}
               >
                 {label}
@@ -591,88 +962,6 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
           🔒 Volatile RAM Ephemeral Protocol
         </Typography>
       </Box>
-
-      {/* ════════════════════════════════════════════════
-          LEGAL DIALOGS
-          ════════════════════════════════════════════════ */}
-      <Dialog
-        open={Boolean(legalModal)}
-        onClose={() => setLegalModal(null)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: '20px', bgcolor: theme.palette.background.paper, p: 1 } }}
-      >
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {legalModal === 'privacy' && <Lock size={20} color="#10B981" />}
-            {legalModal === 'terms' && <FileText size={20} color="#6366F1" />}
-            {legalModal === 'security' && <ShieldCheck size={20} color="#00A3FF" />}
-            <Typography variant="h6" sx={{ fontWeight: 800 }}>
-              {legalModal === 'privacy' && 'Privacy Policy & Zero-Logs Policy'}
-              {legalModal === 'terms' && 'Terms of Service'}
-              {legalModal === 'security' && 'Security & Encryption Specs'}
-            </Typography>
-          </Box>
-          <IconButton onClick={() => setLegalModal(null)} size="small"><X size={18} /></IconButton>
-        </DialogTitle>
-
-        <DialogContent dividers sx={{ borderColor: theme.palette.divider }}>
-          {legalModal === 'privacy' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>1. Zero Data Retention Architecture</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                Fun At Mid Night (FAMN) by Shaadow Platforms operates on a strict zero-retention ephemeral architecture. Messages exchanged during temporary chat sessions are retained exclusively in volatile RAM and WebRTC peer data channels.
-              </Typography>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>2. Immediate Destruction Upon Room Closure</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                Once both users leave a chat room, or after a 5-minute empty room grace period, backend Redis keys and socket queues automatically destroy all message history. No chat transcripts are stored to persistent disks or external databases.
-              </Typography>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>3. No Registration & No Tracking</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                Users do not register accounts, provide email addresses, or submit phone numbers. No persistent tracking cookies or third-party behavioral analytics scripts are embedded.
-              </Typography>
-            </Box>
-          )}
-          {legalModal === 'terms' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>1. Acceptance of Terms</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                By accessing or using Fun At Mid Night and Shaadow Platforms communication tools, you agree to comply with these terms and all applicable laws.
-              </Typography>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>2. Acceptable Use Policy</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                You agree not to use the platform to transmit unlawful material, perform malicious network disruption, or distribute illegal content. Shaadow Platforms reserves the right to terminate abusive rate-limited connections.
-              </Typography>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>3. Service Availability</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                Services are provided on an "as-is" and "as-available" basis without warranties of uninterrupted availability.
-              </Typography>
-            </Box>
-          )}
-          {legalModal === 'security' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>1. WebRTC Peer-to-Peer Encryption</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                Direct communication channels between room participants leverage WebRTC DTLS-SRTP end-to-end transport layer encryption.
-              </Typography>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>2. Temporary Session Keys</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                Cryptographic session keys are generated dynamically per room session and discarded immediately upon termination.
-              </Typography>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>3. Automated Rate Limiting</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                API endpoints are protected by automated IP rate limiting and collision-free room ID verification.
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-
-        <DialogActions sx={{ p: 2 }}>
-          <Button variant="contained" size="small" onClick={() => setLegalModal(null)} sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
