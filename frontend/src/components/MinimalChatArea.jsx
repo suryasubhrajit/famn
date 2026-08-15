@@ -335,6 +335,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
     >
       {/* ── Chat Header ── */}
       <Paper elevation={0} sx={{
+        flexShrink: 0,
         px: { xs: 1.2, sm: 3 }, py: 1,
         bgcolor: theme.palette.background.paper,
         borderBottom: `1px solid ${theme.palette.divider}`,
@@ -518,7 +519,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
           overflowY: 'auto',
           px: { xs: 1.5, sm: 3 },
           pt: { xs: 2.5, sm: 3 },
-          pb: { xs: 'calc(160px + env(safe-area-inset-bottom, 0px))', sm: 4 },
+          pb: { xs: 2.5, sm: 3 },
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
@@ -891,6 +892,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
       {/* ── WhatsApp-Style Reply Preview Bar ── */}
       {replyingTo && (
         <Paper elevation={0} sx={{
+          flexShrink: 0,
           px: 2, py: 1,
           bgcolor: theme.palette.background.paper,
           borderTop: `1px solid ${theme.palette.divider}`,
@@ -922,8 +924,8 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
           elevation={6}
           onClick={scrollToBottom}
           sx={{
-            position: 'fixed',
-            bottom: { xs: '85px', md: '75px' },
+            position: 'absolute',
+            bottom: { xs: '75px', md: '75px' },
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 1300,
@@ -954,15 +956,13 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
         </Paper>
       )}
 
-      {/* ── Input Bar: position:fixed on mobile to escape overflow:hidden ancestors ── */}
+      {/* ── Input Bar ── */}
       <Box sx={{
-        position: { xs: 'fixed', md: 'relative' },
-        bottom: { xs: 0, md: 'auto' },
-        left: { xs: 0, md: 'auto' },
-        right: { xs: 0, md: 'auto' },
-        flexShrink: { md: 0 },
+        flexShrink: 0,
+        width: '100%',
+        position: 'relative',
         p: { xs: '10px 12px', sm: '10px 16px', md: '10px 16px' },
-        pb: { xs: 'calc(12px + env(safe-area-inset-bottom, 0px))', sm: '10px' },
+        pb: { xs: 'calc(10px + env(safe-area-inset-bottom, 0px))', sm: '10px' },
         bgcolor: mode === 'dark' ? 'rgba(15, 20, 35, 0.97)' : 'rgba(255, 255, 255, 0.97)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
@@ -970,8 +970,7 @@ export const MinimalChatArea = ({ onOpenMobileDrawer }) => {
         boxShadow: mode === 'dark'
           ? '0 -4px 20px rgba(0, 0, 0, 0.4)'
           : '0 -4px 20px rgba(99, 102, 241, 0.1)',
-        zIndex: 1200,
-        width: { xs: '100%', md: 'auto' },
+        zIndex: 10,
       }}>
         {typingUser && (
           <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic',

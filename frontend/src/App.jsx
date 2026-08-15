@@ -28,8 +28,8 @@ const AppLayout = () => {
       <CssBaseline />
       <Box
         sx={{
-          width: '100vw',
-          height: '100vh',
+          width: '100%',
+          height: '100dvh',
           display: 'flex',
           bgcolor: 'background.default',
           overflow: 'hidden',
