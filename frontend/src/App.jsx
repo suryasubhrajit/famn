@@ -10,6 +10,7 @@ import { FileUploadModal } from './components/Modals/FileUploadModal';
 import { CaptchaModal } from './components/Modals/CaptchaModal';
 import { ProfileModal } from './components/Modals/ProfileModal';
 import { ImageLightboxModal } from './components/Modals/ImageLightboxModal';
+import { ShortcutsModal } from './components/Modals/ShortcutsModal';
 import { LeaveRoomModal } from './components/Modals/LeaveRoomModal';
 
 const AppLayout = () => {
