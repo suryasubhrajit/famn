@@ -92,15 +92,13 @@ export const RoomLanding = ({ onOpenMobileDrawer }) => {
         sx={{
           position: 'relative',
           width: '100%',
-          minHeight: { xs: 'auto', md: '85vh' },
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'flex-start',
           px: { xs: 2, sm: 3, md: 6 },
-          pt: { xs: 5, md: 6 },
+          pt: { xs: 4, md: 6 },
           pb: { xs: 5, md: 7 },
-          overflow: 'hidden',
           background: mode === 'dark'
             ? 'radial-gradient(ellipse 80% 70% at 50% -10%, rgba(99,102,241,0.3) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 50%, rgba(139,92,246,0.15) 0%, transparent 60%), #0B0F19'
             : 'radial-gradient(ellipse 80% 70% at 50% -10%, rgba(99,102,241,0.18) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 50%, rgba(139,92,246,0.1) 0%, transparent 60%), #F3F4F6',
