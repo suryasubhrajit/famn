@@ -41,30 +41,52 @@ const updateSoloRoomTimer = (io, roomId, peerCount) => {
 
 export const registerRoomSocketHandlers = (io, socket) => {
   // 1. Join Room Event (Enforces strict max 2 participants & 3-4-3 room code format)
-  socket.on('room:join', async ({ roomId, handle, color }) => {
+  socket.on('room:join', async ({ roomId, handle, color, peerToken }) => {
     if (!roomId || !isValidRoomId(roomId)) {
       socket.emit('room:invalid', { error: 'Invalid room format' });
       return;
     }
 
-    const validHandle = handle && !handle.toLowerCase().includes('peer') ? handle : generateFriendlyHandle();
+    const token = peerToken || socket.id;
+    socket.data.peerToken = token;
+    socket.data.handle = handle && !handle.toLowerCase().includes('peer') ? handle : generateFriendlyHandle();
+    socket.data.color = color || '#6366F1';
+    socket.data.roomId = roomId;
+
+    const validHandle = socket.data.handle;
     const roomSockets = io.sockets.adapter.rooms.get(roomId);
 
-    // Build current active peer list
-    const seen = new Set();
-    const existingPeers = [];
-    if (roomSockets) {
-      for (const id of roomSockets) {
+    // Disconnect any stale socket for the SAME peerToken (page refresh handling)
+    if (roomSockets && token) {
+      for (const id of Array.from(roomSockets)) {
         const s = io.sockets.sockets.get(id);
-        if (s && s.data.handle && !seen.has(id)) {
-          seen.add(id);
-          existingPeers.push({ id: s.id, handle: s.data.handle, color: s.data.color || '#6366F1' });
+        if (s && s.id !== socket.id && s.data.peerToken === token) {
+          console.log(`[Reconnection Detected] Disconnecting stale socket ${s.id} for peerToken ${token}`);
+          s.leave(roomId);
+          s.disconnect(true);
         }
       }
     }
 
-    // STRICT 2-PERSON LOCK: If 2 users are already in the room and this socket is NOT one of them
-    const isAlreadyInRoom = existingPeers.some((p) => p.id === socket.id);
+    // Build current active peer list by peerToken
+    const currentSockets = io.sockets.adapter.rooms.get(roomId);
+    const seenTokens = new Set();
+    const existingPeers = [];
+    if (currentSockets) {
+      for (const id of currentSockets) {
+        const s = io.sockets.sockets.get(id);
+        if (s && s.data.handle) {
+          const pToken = s.data.peerToken || s.id;
+          if (!seenTokens.has(pToken)) {
+            seenTokens.add(pToken);
+            existingPeers.push({ id: s.id, peerToken: pToken, handle: s.data.handle, color: s.data.color || '#6366F1' });
+          }
+        }
+      }
+    }
+
+    // STRICT 2-PERSON LOCK: If 2 distinct users are in the room and this token is NOT one of them
+    const isAlreadyInRoom = existingPeers.some((p) => p.peerToken === token || p.id === socket.id);
     if (existingPeers.length >= 2 && !isAlreadyInRoom) {
       console.log(`[Socket Rejected] ${validHandle} tried to join room ${roomId} but it is FULL (2/2)`);
       socket.emit('room:full', {
@@ -75,9 +97,6 @@ export const registerRoomSocketHandlers = (io, socket) => {
     }
 
     socket.join(roomId);
-    socket.data.handle = validHandle;
-    socket.data.color = color || '#6366F1';
-    socket.data.roomId = roomId;
 
     // Recalculate peer list after join
     const updatedSockets = io.sockets.adapter.rooms.get(roomId);

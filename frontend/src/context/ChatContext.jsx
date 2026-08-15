@@ -18,10 +18,20 @@ export const isValidRoomId = (code) => {
   );
 };
 
+// Persistent Device Identifier (peerToken) stored in localStorage
+export const getOrCreatePeerToken = () => {
+  let token = localStorage.getItem('famn_peer_token');
+  if (!token) {
+    token = 'peer_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+    localStorage.setItem('famn_peer_token', token);
+  }
+  return token;
+};
+
 export const ChatProvider = ({ children }) => {
-  // Session Profile
-  const [handle, setHandleState] = useState(() => sessionStorage.getItem('p2p_handle') || '');
-  const [avatarColor, setAvatarColor] = useState(() => sessionStorage.getItem('p2p_color') || '#6366F1');
+  // Session Profile (Persistent across reloads)
+  const [handle, setHandleState] = useState(() => localStorage.getItem('p2p_handle') || sessionStorage.getItem('p2p_handle') || '');
+  const [avatarColor, setAvatarColor] = useState(() => localStorage.getItem('p2p_color') || sessionStorage.getItem('p2p_color') || '#6366F1');
 
   // Room State (Parse Google Meet style room code from path e.g. /tsy-cusn-bti or query param)
   const [roomId, setRoomId] = useState(() => {
@@ -55,10 +65,27 @@ export const ChatProvider = ({ children }) => {
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(true);
   const [captchaToken] = useState('recaptcha-verified-token');
 
-  // Chat Data & Peers
-  const [messages, setMessages] = useState([]);
+  // Chat Data & Peers (Load cached messages from localStorage on mount/refresh)
+  const [messages, setMessages] = useState(() => {
+    if (roomId) {
+      try {
+        const cached = localStorage.getItem(`famn_msgs_${roomId}`);
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
   const [peers, setPeers] = useState([]);
   const [typingUser, setTypingUser] = useState(null);
+
+  // Cache messages to localStorage whenever messages state updates
+  useEffect(() => {
+    if (roomId && messages.length > 0) {
+      try {
+        localStorage.setItem(`famn_msgs_${roomId}`, JSON.stringify(messages));
+      } catch (e) {}
+    }
+  }, [roomId, messages]);
 
   // File Upload & Validation Alert
   const [fileErrorAlert, setFileErrorAlert] = useState(null);
@@ -255,7 +282,12 @@ export const ChatProvider = ({ children }) => {
       setIsConnected(true);
       const currentRoom = roomIdRef.current;
       if (currentRoom) {
-        newSocket.emit('room:join', { roomId: currentRoom, handle, color: avatarColor });
+        newSocket.emit('room:join', {
+          roomId: currentRoom,
+          handle,
+          color: avatarColor,
+          peerToken: getOrCreatePeerToken(),
+        });
       }
     });
 
@@ -271,10 +303,10 @@ export const ChatProvider = ({ children }) => {
       setPeers([]);
     });
 
-    // Handle room expired (e.g. 1-minute solo timeout or room destroyed)
+    // Handle room expired (e.g. 5-minute solo timeout or room destroyed)
     newSocket.on('room:expired', ({ message }) => {
       console.warn('[Room Expired Socket Event]', message);
-      setRoomNoticeAlert(message || 'Room expired because no second participant joined within 1 minute.');
+      setRoomNoticeAlert(message || 'Room expired because no second participant joined within 5 minutes.');
       window.history.replaceState(null, '', '/');
       setRoomId(null);
       setMessages([]);
@@ -290,6 +322,10 @@ export const ChatProvider = ({ children }) => {
           return true;
         });
         setPeers(deduped);
+        // Auto-hide Invite QR Code modal when Person 2 joins (room reaches 2/2 full)
+        if (deduped.length >= 2) {
+          setActiveModal((prev) => (prev === 'qrCode' ? null : prev));
+        }
       }
     });
 
